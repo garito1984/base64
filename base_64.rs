@@ -1,6 +1,6 @@
 
 fn main() {
-    let bs: &[u8] = "zzzzz".as_bytes();
+    let bs: &[u8] = "g".as_bytes();
     let mut base64: Vec<char> = Vec::with_capacity(30);
 
     let mut i: usize = 0;
@@ -44,16 +44,12 @@ fn main() {
 	    // First octet
 	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
 	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits
-	    // Second octet
-	    quantum = quantum << 7;
-	    quantum = quantum | BASE64_ALPHABET_PAD_INDEX as u32;
-	    // Third octet
-	    quantum = quantum << 7; 
-	    quantum = quantum | BASE64_ALPHABET_PAD_INDEX as u32;
+	    // Second octet (IS EMPTY)
+	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00111111_00000000_00000000) >> 16) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[(((quantum & 0b00000000_00000000_11000000_00000000) >> 14) << 4) as usize]); // Second char
+	    base64.push(BASE64_ALPHABET[((quantum &  0b00000000_00000000_00000000_11111100) >> 2) as usize]); // First char
+	    base64.push(BASE64_ALPHABET[((quantum &  0b00000000_00000000_00000000_00000011) << 4) as usize]); // Second char
 	    base64.push(BASE64_ALPHABET_PAD); // Third char
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	}
@@ -67,7 +63,6 @@ fn main() {
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
-const BASE64_ALPHABET_PAD_INDEX: u8 = (BASE64_ALPHABET.len() - 1) as u8; // Last itemp is the pad char
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case
