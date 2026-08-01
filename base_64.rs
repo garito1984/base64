@@ -1,23 +1,23 @@
 
 fn main() {
-    let bs: &[u8] = "g".as_bytes();
+    let bs: &[u8] = "zzzz".as_bytes();
     let mut base64: Vec<char> = Vec::with_capacity(30);
 
     let mut i: usize = 0;
     while i < bs.len() {
-	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
+	let mut quantum: u32; // a quantum is 24 bits (three bytes)
 	if bs.len() >= i+3 {
 	    // First octet
-	    quantum = (bs[i+0] << 2) as u32; // First 6 bits
-	    quantum = quantum | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
+	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
+	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
 	    // Second octet
-	    quantum = quantum << 8;
-	    quantum = quantum | (bs[i+1] << 2) as u32; // First 6 bits
-	    quantum = quantum | ((bs[i+1] << 6) >> 6) as u32; // Last 2 bits
+	    quantum = quantum << 6;
+	    quantum = quantum | (bs[i+1] >> 2) as u32; // First 6 bits
+	    quantum = (quantum << 2) | ((bs[i+1] << 6) >> 6) as u32; // Last 2 bits
 	    // Third octet
-	    quantum = quantum << 8;
-	    quantum = quantum | (bs[i+2] << 2) as u32; // First 6 bits
-	    quantum = quantum | ((bs[i+2] << 6) >> 6) as u32; // Last 2 bits
+	    quantum = quantum << 6;
+	    quantum = quantum | (bs[i+2] >> 2) as u32; // First 6 bits
+	    quantum = (quantum << 2) | ((bs[i+2] << 6) >> 6) as u32; // Last 2 bits
 
 	    // To Base64
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_11111100_00000000_00000000) >> 18) as usize]); // First char
