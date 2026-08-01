@@ -1,6 +1,6 @@
 
 fn main() {
-    let bs: &[u8] = "zzzz".as_bytes();
+    let bs: &[u8] = "zzzzz".as_bytes();
     let mut base64: Vec<char> = Vec::with_capacity(30);
 
     let mut i: usize = 0;
@@ -25,22 +25,21 @@ fn main() {
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00001111_11000000) >> 6) as usize]);  // Third char
 	    base64.push(BASE64_ALPHABET[ (quantum & 0b00000000_00000000_00000000_00111111) as usize]);        // Fourth char
 	} else if bs.len() == i+2 {
+	    // enp6eno=
 	    // First octet
-	    quantum = (bs[i+0] << 1) as u32; // First 6 bits
-	    quantum = quantum | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
+	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
+	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
 	    // Second octet
-	    quantum = quantum << 8;
-	    quantum = quantum | (bs[i+1] << 2) as u32; // First 6 bits
-	    quantum = quantum | ((bs[i+1] << 6) >> 6) as u32; // Last 2 bits
-	    // Third octet
-	    quantum = quantum << 8;
-	    quantum = quantum | BASE64_ALPHABET_PAD as u32;
+	    quantum = quantum << 6;
+	    quantum = quantum | (bs[i+1] >> 2) as u32; // First 6 bits
+	    quantum = (quantum << 2) | ((bs[i+1] << 6) >> 6) as u32; // Last 2 bits
+	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_11111100_00000000_00000000) >> 18) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000011_11110000_00000000) >> 12) as usize]); // Second char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00001111_11000000) >> 6) as usize]);  // Third char
-	    base64.push(BASE64_ALPHABET[ (quantum & 0b00000000_00000000_00000000_00111111) as usize]);        // Fourth char
+	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_11111100_00000000) >> 10) as usize]); // First char
+	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000011_11110000) >> 4) as usize]); // Second char
+	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_00001111) << 2) as usize]);  // Third char
+	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	} else if bs.len() == i+1 {
 	    // First octet
 	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
