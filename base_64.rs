@@ -1,6 +1,6 @@
 
 fn main() {
-    let bs: &[u8] = "g".as_bytes();
+    let bs: &[u8] = "Viva la revolucion!".as_bytes();
     let mut base64: Vec<char> = Vec::with_capacity(30);
 
     let mut i: usize = 0;
@@ -25,7 +25,6 @@ fn main() {
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00001111_11000000) >> 6) as usize]);  // Third char
 	    base64.push(BASE64_ALPHABET[ (quantum & 0b00000000_00000000_00000000_00111111) as usize]);        // Fourth char
 	} else if bs.len() == i+2 {
-	    // enp6eno=
 	    // First octet
 	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
 	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
