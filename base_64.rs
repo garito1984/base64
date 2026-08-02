@@ -1,4 +1,5 @@
 
+use std::io::{Read};
 use std::io;
 
 // Test with command:
@@ -9,7 +10,7 @@ fn main() -> io::Result<()> {
     let mut base64: Vec<char> = Vec::with_capacity(INPUT_BUFFER_SIZE + 500);
 
     loop {
-	let size = io::Read::read(&mut io::stdin(), &mut input)?;
+	let size = io::stdin().read(&mut input)?;
 	if size == 0 {
 	    break;
 	}
