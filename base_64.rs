@@ -9,18 +9,18 @@ fn main() -> io::Result<()> {
     io::stdin().read_line(&mut input)?;
 
     let bs: &[u8] = input.as_bytes();
-    let mut base64: Vec<char> = Vec::with_capacity(10 * 4);
+    let mut base64: Vec<char> = Vec::with_capacity(10 * QUANTUM_BYTE_SIZE);
 
     let mut i: usize = 0;
     while i < bs.len() {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
 	if bs.len() >= i+3 {
 	    // First octet
-	    quantum = move_octect(quantum, bs[i+0]);
+	    quantum = copy_octect(quantum, bs[i+0]);
 	    // Second octet
-	    quantum = move_octect(quantum, bs[i+1]);
+	    quantum = copy_octect(quantum, bs[i+1]);
 	    // Third octet
-	    quantum = move_octect(quantum, bs[i+2]);
+	    quantum = copy_octect(quantum, bs[i+2]);
 
 	    // To Base64
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_11111100_00000000_00000000) >> 18) as usize]); // First char
@@ -29,9 +29,9 @@ fn main() -> io::Result<()> {
 	    base64.push(BASE64_ALPHABET[ (quantum & 0b00000000_00000000_00000000_00111111) as usize]);        // Fourth char
 	} else if bs.len() == i+2 {
 	    // First octet
-	    quantum = move_octect(quantum, bs[i+0]);
+	    quantum = copy_octect(quantum, bs[i+0]);
 	    // Second octet
-	    quantum = move_octect(quantum, bs[i+1]);
+	    quantum = copy_octect(quantum, bs[i+1]);
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
@@ -41,7 +41,7 @@ fn main() -> io::Result<()> {
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	} else if bs.len() == i+1 {
 	    // First octet
-	    quantum = move_octect(quantum, bs[i+0]);
+	    quantum = copy_octect(quantum, bs[i+0]);
 	    // Second octet (IS EMPTY)
 	    // Third octet (IS EMPTY)
 
@@ -63,6 +63,8 @@ fn main() -> io::Result<()> {
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
+
+const QUANTUM_BYTE_SIZE: usize = 4;
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
