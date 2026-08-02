@@ -78,9 +78,9 @@ const BASE64_ALPHABET: [char; 65] = [
 ];
 
 //
-// Move byte to lower byte of u32 value
+// Shift 8 bits to the left and copy the byte into the lower bits that are now free
 //
-// 0b00000000_00000000_00000000_00000000 -> 0b00000000_00000000_00000000_11111111
+// 0b00000000_00000000_00000000_11111111 -> 0b00000000_00000000_11111111_10111011
 //
 fn move_octect(quantum: u32, b: u8) -> u32 {
     let q = (quantum << 6) | (b >> 2) as u32; // Higher 6 bits
