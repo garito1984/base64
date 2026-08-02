@@ -105,7 +105,7 @@ fn add_chars(
     trd: u32,
     frt: u32
 ) {
-    for index in vec!(fst, snd, trd, frt) {
+    for index in [fst, snd, trd, frt] {
 	base64out.push(BASE64_ALPHABET[index as usize]);
     }
 }
