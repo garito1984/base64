@@ -55,7 +55,7 @@ fn main() -> io::Result<()> {
 	    add_chars(
 		&mut base64,
 		(quantum & 0b00000000_00000000_00000000_11111100) >> 2, // First char
-		(quantum & 0b00000000_00000000_00000011_00000011) << 4, // Second char
+		(quantum & 0b00000000_00000000_00000000_00000011) << 4, // Second char
 		BASE64_ALPHABET_PAD_INDEX,                              // Third char
 		BASE64_ALPHABET_PAD_INDEX                               // Fourth char
 	    );
