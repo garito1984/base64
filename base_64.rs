@@ -2,7 +2,7 @@
 use std::io;
 
 // Test with command:
-// rustc base_64.rs && echo -n "g" | ./base_64
+// rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> io::Result<()> {
     let mut input = String::with_capacity(1000);
@@ -16,7 +16,7 @@ fn main() -> io::Result<()> {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
 	if bs.len() >= i+3 {
 	    // First octet
-	    quantum = move_octect(quantum, bs[i+1]);
+	    quantum = move_octect(quantum, bs[i+0]);
 	    // Second octet
 	    quantum = quantum << 6;
 	    quantum = move_octect(quantum, bs[i+1]);
