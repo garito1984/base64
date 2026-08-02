@@ -23,10 +23,10 @@ fn main() -> io::Result<()> {
 	    quantum = copy_octect(quantum, bs[i+2]);
 
 	    // To Base64
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_11111100_00000000_00000000) >> 18) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000011_11110000_00000000) >> 12) as usize]); // Second char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00001111_11000000) >> 6) as usize]);  // Third char
-	    base64.push(BASE64_ALPHABET[ (quantum & 0b00000000_00000000_00000000_00111111) as usize]);        // Fourth char
+	    base64.push(get_base64_char((quantum & 0b00000000_11111100_00000000_00000000) >> 18)); // First char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000011_11110000_00000000) >> 12)); // Second char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000000_00001111_11000000) >> 6));  // Third char
+	    base64.push(get_base64_char( quantum & 0b00000000_00000000_00000000_00111111));       // Fourth char
 	} else if bs.len() == i+2 {
 	    // First octet
 	    quantum = copy_octect(quantum, bs[i+0]);
@@ -35,9 +35,9 @@ fn main() -> io::Result<()> {
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_11111100_00000000) >> 10) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000011_11110000) >> 4) as usize]);  // Second char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_00001111) << 2) as usize]);  // Third char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000000_11111100_00000000) >> 10)); // First char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000000_00000011_11110000) >> 4));  // Second char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000000_00000000_00001111) << 2));  // Third char
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	} else if bs.len() == i+1 {
 	    // First octet
@@ -46,8 +46,8 @@ fn main() -> io::Result<()> {
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_11111100) >> 2) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_00000011) << 4) as usize]); // Second char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000000_00000000_11111100) >> 2)); // First char
+	    base64.push(get_base64_char((quantum & 0b00000000_00000000_00000000_00000011) << 4)); // Second char
 	    base64.push(BASE64_ALPHABET_PAD); // Third char
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	}
@@ -88,3 +88,6 @@ fn copy_octect(quantum: u32, byte: u8) -> u32 {
     (quantum << 8) | byte as u32
 }
 
+fn get_base64_char(index: u32) -> char {
+    BASE64_ALPHABET[index as usize]
+}
