@@ -80,6 +80,11 @@ const BASE64_ALPHABET: [char; 65] = [
     '-', '_', BASE64_ALPHABET_PAD
 ];
 
+//
+// Move byte to lower byte of u32 value
+//
+// 0b00000000_00000000_00000000_00000000 -> 0b00000000_00000000_00000000_11111111
+//
 fn move_octect(quantum: u32, b: u8) -> u32 {
     let q = quantum | (b >> 2) as u32; // Higher 6 bits
     (q << 2) | ((b << 6) >> 6) as u32  // Lower 2 bits 
