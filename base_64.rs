@@ -46,8 +46,8 @@ fn main() -> io::Result<()> {
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    base64.push(BASE64_ALPHABET[((quantum &  0b00000000_00000000_00000000_11111100) >> 2) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[((quantum &  0b00000000_00000000_00000000_00000011) << 4) as usize]); // Second char
+	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_11111100) >> 2) as usize]); // First char
+	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_00000011) << 4) as usize]); // Second char
 	    base64.push(BASE64_ALPHABET_PAD); // Third char
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	}
