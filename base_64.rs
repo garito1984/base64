@@ -5,12 +5,22 @@ use std::io;
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> io::Result<()> {
-    let mut input = String::with_capacity(1000);
+    let mut input = String::with_capacity(INPUT_BUFFER_SIZE);
     io::stdin().read_line(&mut input)?;
 
     let bs: &[u8] = input.as_bytes();
-    let mut base64: Vec<char> = Vec::with_capacity(10 * QUANTUM_BYTE_SIZE);
+    let mut base64: Vec<char> = Vec::with_capacity(INPUT_BUFFER_SIZE + 500);
 
+    encode(bs, &mut base64);
+    
+    for c in base64 {
+	print!("{}", c);
+    }
+
+    Ok(())
+}
+
+fn encode(bs: &[u8], base64: &mut Vec<char>) {
     let mut i: usize = 0;
     while i < bs.len() {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
@@ -24,7 +34,7 @@ fn main() -> io::Result<()> {
 
 	    // To Base64
 	    add_chars(
-		&mut base64,
+		base64,
 		(quantum & 0b00000000_11111100_00000000_00000000) >> 18, // First char
 		(quantum & 0b00000000_00000011_11110000_00000000) >> 12, // Second char
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
@@ -39,7 +49,7 @@ fn main() -> io::Result<()> {
 
 	    // To Base64
 	    add_chars(
-		&mut base64,
+		base64,
 		(quantum & 0b00000000_00000000_11111100_00000000) >> 10, // First char
 		(quantum & 0b00000000_00000000_00000011_11110000) >> 4,  // Second char
 		(quantum & 0b00000000_00000000_00000000_00001111) << 2,  // Third char
@@ -53,7 +63,7 @@ fn main() -> io::Result<()> {
 
 	    // To Base64
 	    add_chars(
-		&mut base64,
+		base64,
 		(quantum & 0b00000000_00000000_00000000_11111100) >> 2, // First char
 		(quantum & 0b00000000_00000000_00000000_00000011) << 4, // Second char
 		BASE64_ALPHABET_PAD_INDEX,                              // Third char
@@ -63,18 +73,12 @@ fn main() -> io::Result<()> {
 
 	i += 3; // Jump to next input quantum
     }
-
-    for c in base64 {
-	print!("{}", c);
-    }
-
-    Ok(())
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
-const QUANTUM_BYTE_SIZE: usize = 4;
+const INPUT_BUFFER_SIZE: usize = 1000;
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
