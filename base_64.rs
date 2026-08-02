@@ -23,14 +23,13 @@ fn main() -> io::Result<()> {
 	    quantum = copy_octect(quantum, bs[i+2]);
 
 	    // To Base64
-	    for base64_index in vec!(
+	    add_chars(
+		&mut base64,
 		(quantum & 0b00000000_11111100_00000000_00000000) >> 18, // First char
 		(quantum & 0b00000000_00000011_11110000_00000000) >> 12, // Second char
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
 		 quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
-	    ) {
-		base64.push(BASE64_ALPHABET[base64_index as usize]);
-	    }
+	    );
 	} else if bs.len() == i+2 {
 	    // First octet
 	    quantum = copy_octect(quantum, bs[i+0]);
@@ -39,14 +38,13 @@ fn main() -> io::Result<()> {
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    for base64_index in vec!(
+	    add_chars(
+		&mut base64,
 		(quantum & 0b00000000_00000000_11111100_00000000) >> 10, // First char
 		(quantum & 0b00000000_00000000_00000011_11110000) >> 4,  // Second char
-		(quantum & 0b00000000_00000000_00000000_00001111) << 2   // Third char
-	    ) {
-		base64.push(BASE64_ALPHABET[base64_index as usize]);
-	    }
-	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
+		(quantum & 0b00000000_00000000_00000000_00001111) << 2,  // Third char
+		BASE64_ALPHABET_PAD_INDEX                                // Fourth char
+	    );
 	} else if bs.len() == i+1 {
 	    // First octet
 	    quantum = copy_octect(quantum, bs[i+0]);
@@ -54,14 +52,13 @@ fn main() -> io::Result<()> {
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
-	    for base64_index in vec!(
+	    add_chars(
+		&mut base64,
 		(quantum & 0b00000000_00000000_00000000_11111100) >> 2, // First char
-		(quantum & 0b00000000_00000000_00000000_00000011) << 4  // Second char
-	    ) {
-		base64.push(BASE64_ALPHABET[base64_index as usize]);
-	    }
-	    base64.push(BASE64_ALPHABET_PAD); // Third char
-	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
+		(quantum & 0b00000000_00000000_00000011_00000011) << 4, // Second char
+		BASE64_ALPHABET_PAD_INDEX,                              // Third char
+		BASE64_ALPHABET_PAD_INDEX                               // Fourth char
+	    );
 	}
 
 	i += 3; // Jump to next input quantum
@@ -75,6 +72,7 @@ fn main() -> io::Result<()> {
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
+const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
 const QUANTUM_BYTE_SIZE: usize = 4;
 
@@ -98,4 +96,16 @@ const BASE64_ALPHABET: [char; 65] = [
 //
 fn copy_octect(quantum: u32, byte: u8) -> u32 {
     (quantum << 8) | byte as u32
+}
+
+fn add_chars(
+    base64out: &mut Vec<char>,
+    fst: u32,
+    snd: u32,
+    trd: u32,
+    frt: u32
+) {
+    for index in vec!(fst, snd, trd, frt) {
+	base64out.push(BASE64_ALPHABET[index as usize]);
+    }
 }
