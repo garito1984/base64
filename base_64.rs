@@ -39,7 +39,7 @@ fn main() -> io::Result<()> {
 
 	    // To Base64
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_11111100_00000000) >> 10) as usize]); // First char
-	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000011_11110000) >> 4) as usize]); // Second char
+	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000011_11110000) >> 4) as usize]);  // Second char
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_00000000_00000000_00001111) << 2) as usize]);  // Third char
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	} else if bs.len() == i+1 {
