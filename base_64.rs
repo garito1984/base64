@@ -78,12 +78,11 @@ const BASE64_ALPHABET: [char; 65] = [
 ];
 
 //
-// Shift 8 bits to the left and copy the byte into the lower bits that are now free
+// Shift the quantum 8 bits to the left and copy the byte into the lower bits
 //
 // 0b00000000_00000000_00000000_11111111 -> 0b00000000_00000000_11111111_10111011
 //
-fn move_octect(quantum: u32, b: u8) -> u32 {
-    let q = (quantum << 6) | (b >> 2) as u32; // Higher 6 bits
-    (q << 2) | ((b << 6) >> 6) as u32  // Lower 2 bits 
+fn copy_octect(quantum: u32, byte: u8) -> u32 {
+    (quantum << 8) | byte as u32
 }
 
