@@ -9,7 +9,7 @@ fn main() -> io::Result<()> {
     io::stdin().read_line(&mut input)?;
 
     let bs: &[u8] = input.as_bytes();
-    let mut base64: Vec<char> = Vec::with_capacity(30);
+    let mut base64: Vec<char> = Vec::with_capacity(10 * 4);
 
     let mut i: usize = 0;
     while i < bs.len() {
