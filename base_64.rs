@@ -5,26 +5,32 @@ use std::io;
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> io::Result<()> {
-    let mut input = String::with_capacity(INPUT_BUFFER_SIZE);
-    io::stdin().read_line(&mut input)?;
-
-    let bs: &[u8] = input.as_bytes();
+    let mut input: [u8; INPUT_BUFFER_SIZE] = [0; INPUT_BUFFER_SIZE];
     let mut base64: Vec<char> = Vec::with_capacity(INPUT_BUFFER_SIZE + 500);
 
-    encode(bs, &mut base64);
-    
-    for c in base64 {
-	print!("{}", c);
+    loop {
+	let size = io::Read::read(&mut io::stdin(), &mut input)?;
+	if size == 0 {
+	    break;
+	}
+
+	encode(&input, size, &mut base64);
+
+	for c in &base64 {
+	    print!("{}", c);
+	}
+	// Clear for next iteration
+	base64.clear();
     }
 
     Ok(())
 }
 
-fn encode(bs: &[u8], base64: &mut Vec<char>) {
+fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
     let mut i: usize = 0;
     while i < bs.len() {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
-	if bs.len() >= i+3 {
+	if size >= i+3 {
 	    // First octet
 	    quantum = copy_octect(quantum, bs[i+0]);
 	    // Second octet
@@ -38,9 +44,9 @@ fn encode(bs: &[u8], base64: &mut Vec<char>) {
 		(quantum & 0b00000000_11111100_00000000_00000000) >> 18, // First char
 		(quantum & 0b00000000_00000011_11110000_00000000) >> 12, // Second char
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
-		 quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
+		quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
 	    );
-	} else if bs.len() == i+2 {
+	} else if size == i+2 {
 	    // First octet
 	    quantum = copy_octect(quantum, bs[i+0]);
 	    // Second octet
@@ -55,7 +61,7 @@ fn encode(bs: &[u8], base64: &mut Vec<char>) {
 		(quantum & 0b00000000_00000000_00000000_00001111) << 2,  // Third char
 		BASE64_ALPHABET_PAD_INDEX                                // Fourth char
 	    );
-	} else if bs.len() == i+1 {
+	} else if size == i+1 {
 	    // First octet
 	    quantum = copy_octect(quantum, bs[i+0]);
 	    // Second octet (IS EMPTY)
@@ -78,7 +84,7 @@ fn encode(bs: &[u8], base64: &mut Vec<char>) {
 const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
-const INPUT_BUFFER_SIZE: usize = 1000;
+const INPUT_BUFFER_SIZE: usize = 400 * 3;
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
