@@ -1,6 +1,14 @@
 
-fn main() {
-    let bs: &[u8] = "Viva la revolucion!".as_bytes();
+use std::io;
+
+// Test with command:
+// rustc base_64.rs && echo -n "g" | ./base_64
+//
+fn main() -> io::Result<()> {
+    let mut input = String::with_capacity(1000);
+    io::stdin().read_line(&mut input)?;
+
+    let bs: &[u8] = input.as_bytes();
     let mut base64: Vec<char> = Vec::with_capacity(30);
 
     let mut i: usize = 0;
@@ -59,6 +67,8 @@ fn main() {
     for c in base64 {
 	print!("{}", c);
     }
+
+    Ok(())
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
