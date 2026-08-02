@@ -13,19 +13,16 @@ fn main() -> io::Result<()> {
 
     let mut i: usize = 0;
     while i < bs.len() {
-	let mut quantum: u32; // a quantum is 24 bits (three bytes)
+	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
 	if bs.len() >= i+3 {
 	    // First octet
-	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
-	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
+	    quantum = move_octect(quantum, bs[i+1]);
 	    // Second octet
 	    quantum = quantum << 6;
-	    quantum = quantum | (bs[i+1] >> 2) as u32; // First 6 bits
-	    quantum = (quantum << 2) | ((bs[i+1] << 6) >> 6) as u32; // Last 2 bits
+	    quantum = move_octect(quantum, bs[i+1]);
 	    // Third octet
 	    quantum = quantum << 6;
-	    quantum = quantum | (bs[i+2] >> 2) as u32; // First 6 bits
-	    quantum = (quantum << 2) | ((bs[i+2] << 6) >> 6) as u32; // Last 2 bits
+	    quantum = move_octect(quantum, bs[i+2]);
 
 	    // To Base64
 	    base64.push(BASE64_ALPHABET[((quantum & 0b00000000_11111100_00000000_00000000) >> 18) as usize]); // First char
@@ -34,12 +31,10 @@ fn main() -> io::Result<()> {
 	    base64.push(BASE64_ALPHABET[ (quantum & 0b00000000_00000000_00000000_00111111) as usize]);        // Fourth char
 	} else if bs.len() == i+2 {
 	    // First octet
-	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
-	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits 
+	    quantum = move_octect(quantum, bs[i+0]);
 	    // Second octet
 	    quantum = quantum << 6;
-	    quantum = quantum | (bs[i+1] >> 2) as u32; // First 6 bits
-	    quantum = (quantum << 2) | ((bs[i+1] << 6) >> 6) as u32; // Last 2 bits
+	    quantum = move_octect(quantum, bs[i+1]);
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
@@ -49,8 +44,7 @@ fn main() -> io::Result<()> {
 	    base64.push(BASE64_ALPHABET_PAD); // Fourth char
 	} else if bs.len() == i+1 {
 	    // First octet
-	    quantum = (bs[i+0] >> 2) as u32; // First 6 bits
-	    quantum = (quantum << 2) | ((bs[i+0] << 6) >> 6) as u32; // Last 2 bits
+	    quantum = move_octect(quantum, bs[i+0]);
 	    // Second octet (IS EMPTY)
 	    // Third octet (IS EMPTY)
 
@@ -85,3 +79,9 @@ const BASE64_ALPHABET: [char; 65] = [
     // Special characters
     '-', '_', BASE64_ALPHABET_PAD
 ];
+
+fn move_octect(quantum: u32, b: u8) -> u32 {
+    let q = quantum | (b >> 2) as u32; // Higher 6 bits
+    (q << 2) | ((b << 6) >> 6) as u32  // Lower 2 bits 
+}
+
