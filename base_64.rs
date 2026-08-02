@@ -18,10 +18,8 @@ fn main() -> io::Result<()> {
 	    // First octet
 	    quantum = move_octect(quantum, bs[i+0]);
 	    // Second octet
-	    quantum = quantum << 6;
 	    quantum = move_octect(quantum, bs[i+1]);
 	    // Third octet
-	    quantum = quantum << 6;
 	    quantum = move_octect(quantum, bs[i+2]);
 
 	    // To Base64
@@ -33,7 +31,6 @@ fn main() -> io::Result<()> {
 	    // First octet
 	    quantum = move_octect(quantum, bs[i+0]);
 	    // Second octet
-	    quantum = quantum << 6;
 	    quantum = move_octect(quantum, bs[i+1]);
 	    // Third octet (IS EMPTY)
 
@@ -86,7 +83,7 @@ const BASE64_ALPHABET: [char; 65] = [
 // 0b00000000_00000000_00000000_00000000 -> 0b00000000_00000000_00000000_11111111
 //
 fn move_octect(quantum: u32, b: u8) -> u32 {
-    let q = quantum | (b >> 2) as u32; // Higher 6 bits
+    let q = (quantum << 6) | (b >> 2) as u32; // Higher 6 bits
     (q << 2) | ((b << 6) >> 6) as u32  // Lower 2 bits 
 }
 
