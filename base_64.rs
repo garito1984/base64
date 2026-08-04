@@ -17,9 +17,16 @@ fn main() -> io::Result<()> {
 
 	encode(&input, size, &mut base64);
 
+	let mut count = 0;
 	for c in &base64 {
 	    print!("{}", c);
+	    count += 1;
+	    if count == 76 {
+		print!("\n");
+		count = 0;
+	    }
 	}
+
 	// Clear for next iteration
 	base64.clear();
     }
@@ -29,7 +36,7 @@ fn main() -> io::Result<()> {
 
 fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
     let mut i: usize = 0;
-    while i < bs.len() {
+    while i < size {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
 	if size >= i+3 {
 	    // First octet
@@ -45,7 +52,7 @@ fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
 		(quantum & 0b00000000_11111100_00000000_00000000) >> 18, // First char
 		(quantum & 0b00000000_00000011_11110000_00000000) >> 12, // Second char
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
-		quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
+		 quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
 	    );
 	} else if size == i+2 {
 	    // First octet
@@ -85,7 +92,7 @@ fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
 const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
-const INPUT_BUFFER_SIZE: usize = 400 * 3;
+const INPUT_BUFFER_SIZE: usize = 76 * 10 * 3;
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
@@ -97,7 +104,7 @@ const BASE64_ALPHABET: [char; 65] = [
     // Numbers
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     // Special characters
-    '-', '_', BASE64_ALPHABET_PAD
+    '+', '/', BASE64_ALPHABET_PAD
 ];
 
 //
