@@ -6,8 +6,8 @@ use std::io;
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> Result<(), io::Error> {
-    let mut rb = ReadBuffer::new(76);
-    let mut base64: Vec<char> = Vec::with_capacity(INPUT_BUFFER_SIZE + 500);
+    let mut rb = ReadBuffer::new(DEFAULT_LINE_WIDTH);
+    let mut base64: Vec<char> = Vec::with_capacity(rb.buf.len() + 500);
 
     loop {
 	let size = rb.read(&mut io::stdin())?;
@@ -115,7 +115,9 @@ const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
 const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
-const INPUT_BUFFER_SIZE: usize = 10;
+const INPUT_BUFFER_SIZE: usize = 100;
+
+const DEFAULT_LINE_WIDTH: usize = 76;
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
