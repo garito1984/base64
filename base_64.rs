@@ -5,23 +5,23 @@ use std::io;
 // Test with command:
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
-fn main() -> io::Result<()> {
-    let mut input: [u8; INPUT_BUFFER_SIZE] = [0; INPUT_BUFFER_SIZE];
+fn main() -> Result<(), io::Error> {
+    let mut rb = ReadBuffer::new(76);
     let mut base64: Vec<char> = Vec::with_capacity(INPUT_BUFFER_SIZE + 500);
 
     loop {
-	let size = io::stdin().read(&mut input)?;
+	let size = rb.read(&mut io::stdin())?;
 	if size == 0 {
 	    break;
 	}
 
-	encode(&input, size, &mut base64);
+	encode(&mut rb, &mut base64);
 
 	let mut count = 0;
 	for c in &base64 {
 	    print!("{}", c);
 	    count += 1;
-	    if count == 76 {
+	    if count == rb.line_width {
 		print!("\n");
 		count = 0;
 	    }
@@ -34,17 +34,39 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
+struct ReadBuffer {
+    buf: Box<[u8]>,
+    line_width: usize,
+    read_size: usize
+}
+
+impl ReadBuffer {
+    fn new(line_width: usize) -> ReadBuffer {
+	ReadBuffer {
+	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width].into_boxed_slice(),
+	    line_width: line_width,
+	    read_size: 0
+	}
+    }
+
+    fn read(&mut self, input: &mut dyn Read) -> Result<usize, io::Error> {
+	let size = input.read(&mut self.buf)?;
+	self.read_size = size;
+	Ok(size)
+    }
+}
+
+fn encode(buffer_read: &mut ReadBuffer, base64: &mut Vec<char>) {
     let mut i: usize = 0;
-    while i < size {
+    while i < buffer_read.read_size {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
-	if size >= i+3 {
+	if buffer_read.read_size >= i+3 {
 	    // First octet
-	    quantum = copy_octect(quantum, bs[i+0]);
+	    quantum = copy_octect(quantum, buffer_read.buf[i+0]);
 	    // Second octet
-	    quantum = copy_octect(quantum, bs[i+1]);
+	    quantum = copy_octect(quantum, buffer_read.buf[i+1]);
 	    // Third octet
-	    quantum = copy_octect(quantum, bs[i+2]);
+	    quantum = copy_octect(quantum, buffer_read.buf[i+2]);
 
 	    // To Base64
 	    add_chars(
@@ -54,11 +76,11 @@ fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
 		 quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
 	    );
-	} else if size == i+2 {
+	} else if buffer_read.read_size == i+2 {
 	    // First octet
-	    quantum = copy_octect(quantum, bs[i+0]);
+	    quantum = copy_octect(quantum, buffer_read.buf[i+0]);
 	    // Second octet
-	    quantum = copy_octect(quantum, bs[i+1]);
+	    quantum = copy_octect(quantum, buffer_read.buf[i+1]);
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
@@ -69,9 +91,9 @@ fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
 		(quantum & 0b00000000_00000000_00000000_00001111) << 2,  // Third char
 		BASE64_ALPHABET_PAD_INDEX                                // Fourth char
 	    );
-	} else if size == i+1 {
+	} else if buffer_read.read_size == i+1 {
 	    // First octet
-	    quantum = copy_octect(quantum, bs[i+0]);
+	    quantum = copy_octect(quantum, buffer_read.buf[i+0]);
 	    // Second octet (IS EMPTY)
 	    // Third octet (IS EMPTY)
 
@@ -92,7 +114,8 @@ fn encode(bs: &[u8], size: usize, base64: &mut Vec<char>) {
 const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
-const INPUT_BUFFER_SIZE: usize = 76 * 10 * 3;
+const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
+const INPUT_BUFFER_SIZE: usize = 10;
 
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
