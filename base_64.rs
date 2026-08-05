@@ -20,15 +20,7 @@ fn main() -> Result<(), io::Error> {
 	encode(&mut rb, &mut base64);
 
 	// Print the encoded version
-	let mut count = 0;
-	for c in &base64 {
-	    print!("{}", c);
-	    count += 1;
-	    if count == rb.line_width {
-		print!("\n");
-		count = 0;
-	    }
-	}
+	print(&base64, &rb);
 
 	// Clear for next iteration
 	base64.clear();
@@ -77,7 +69,7 @@ fn encode(rb: &mut ReadBuffer, base64: &mut Vec<char>) {
 		(quantum & 0b00000000_11111100_00000000_00000000) >> 18, // First char
 		(quantum & 0b00000000_00000011_11110000_00000000) >> 12, // Second char
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
-		 quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
+		quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
 	    );
 	} else if rb.read_size == i+2 {
 	    // First octet
@@ -111,6 +103,18 @@ fn encode(rb: &mut ReadBuffer, base64: &mut Vec<char>) {
 	}
 
 	i += 3; // Jump to next input quantum
+    }
+}
+
+fn print(base64: &Vec<char>, rb: &ReadBuffer) {
+    let mut count = 0;
+    for c in base64 {
+	print!("{}", c);
+	count += 1;
+	if count == rb.line_width {
+	    print!("\n");
+	    count = 0;
+	}
     }
 }
 
