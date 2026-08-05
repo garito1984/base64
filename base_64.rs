@@ -6,7 +6,19 @@ use std::io;
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> Result<(), io::Error> {
-    let mut rb = ReadBuffer::new(DEFAULT_LINE_WIDTH);
+    
+    let mut line_width_flag = false;
+    let mut line_width_value: Option<usize> = None;
+    for arg in std::env::args() {
+	if arg == "-w" {
+	    line_width_flag = true;
+	} else if line_width_flag {
+	    line_width_value = Some(arg.parse::<usize>().unwrap());
+	    break;
+	}
+    }
+
+    let mut rb = ReadBuffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
     let mut base64: Vec<char> = Vec::with_capacity(rb.buf.len() + 500);
 
     loop {
