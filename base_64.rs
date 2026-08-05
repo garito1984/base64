@@ -115,7 +115,7 @@ const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
 
 const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
-const INPUT_BUFFER_SIZE: usize = 100;
+const INPUT_BUFFER_SIZE: usize = 10;
 
 const DEFAULT_LINE_WIDTH: usize = 76;
 
