@@ -10,13 +10,16 @@ fn main() -> Result<(), io::Error> {
     let mut base64: Vec<char> = Vec::with_capacity(rb.buf.len() + 500);
 
     loop {
+	// Read a chunk of the input
 	let size = rb.read(&mut io::stdin())?;
 	if size == 0 {
 	    break;
 	}
 
+	// Process
 	encode(&mut rb, &mut base64);
 
+	// Print the encoded version
 	let mut count = 0;
 	for c in &base64 {
 	    print!("{}", c);
