@@ -56,17 +56,17 @@ impl ReadBuffer {
     }
 }
 
-fn encode(buffer_read: &mut ReadBuffer, base64: &mut Vec<char>) {
+fn encode(rb: &mut ReadBuffer, base64: &mut Vec<char>) {
     let mut i: usize = 0;
-    while i < buffer_read.read_size {
+    while i < rb.read_size {
 	let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
-	if buffer_read.read_size >= i+3 {
+	if rb.read_size >= i+3 {
 	    // First octet
-	    quantum = copy_octect(quantum, buffer_read.buf[i+0]);
+	    quantum = copy_octect(quantum, rb.buf[i+0]);
 	    // Second octet
-	    quantum = copy_octect(quantum, buffer_read.buf[i+1]);
+	    quantum = copy_octect(quantum, rb.buf[i+1]);
 	    // Third octet
-	    quantum = copy_octect(quantum, buffer_read.buf[i+2]);
+	    quantum = copy_octect(quantum, rb.buf[i+2]);
 
 	    // To Base64
 	    add_chars(
@@ -76,11 +76,11 @@ fn encode(buffer_read: &mut ReadBuffer, base64: &mut Vec<char>) {
 		(quantum & 0b00000000_00000000_00001111_11000000) >> 6,  // Third char
 		 quantum & 0b00000000_00000000_00000000_00111111         // Fourth char
 	    );
-	} else if buffer_read.read_size == i+2 {
+	} else if rb.read_size == i+2 {
 	    // First octet
-	    quantum = copy_octect(quantum, buffer_read.buf[i+0]);
+	    quantum = copy_octect(quantum, rb.buf[i+0]);
 	    // Second octet
-	    quantum = copy_octect(quantum, buffer_read.buf[i+1]);
+	    quantum = copy_octect(quantum, rb.buf[i+1]);
 	    // Third octet (IS EMPTY)
 
 	    // To Base64
@@ -91,9 +91,9 @@ fn encode(buffer_read: &mut ReadBuffer, base64: &mut Vec<char>) {
 		(quantum & 0b00000000_00000000_00000000_00001111) << 2,  // Third char
 		BASE64_ALPHABET_PAD_INDEX                                // Fourth char
 	    );
-	} else if buffer_read.read_size == i+1 {
+	} else if rb.read_size == i+1 {
 	    // First octet
-	    quantum = copy_octect(quantum, buffer_read.buf[i+0]);
+	    quantum = copy_octect(quantum, rb.buf[i+0]);
 	    // Second octet (IS EMPTY)
 	    // Third octet (IS EMPTY)
 
