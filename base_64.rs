@@ -1,5 +1,5 @@
 
-use std::io::{Read};
+use std::io::{Read, Write};
 use std::io;
 
 // Test with command:
@@ -26,7 +26,7 @@ fn main() -> Result<(), io::Error> {
 	encode(&mut rb, &mut base64);
 
 	// Print the encoded version
-	print(&base64, &rb);
+	print(&base64, &rb)?;
 
 	// Clear for next iteration
 	base64.clear();
@@ -43,8 +43,9 @@ struct ReadBuffer {
 
 impl ReadBuffer {
     fn new(line_width: usize) -> ReadBuffer {
+	let line_width_non_zero = match line_width { 0 => DEFAULT_LINE_WIDTH, _ => line_width };
 	ReadBuffer {
-	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width].into_boxed_slice(),
+	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width_non_zero].into_boxed_slice(),
 	    line_width: line_width,
 	    read_size: 0
 	}
@@ -112,16 +113,26 @@ fn encode(rb: &mut ReadBuffer, base64: &mut Vec<char>) {
     }
 }
 
-fn print(base64: &Vec<char>, rb: &ReadBuffer) {
+fn print(base64: &Vec<char>, rb: &ReadBuffer) -> Result<(), io::Error> {
+    let disable_new_lines = 0 == rb.line_width;
     let mut count = 0;
     for c in base64 {
 	print!("{}", c);
+
+	if disable_new_lines {
+	    continue;
+	}
+	
 	count += 1;
 	if count == rb.line_width {
 	    print!("\n");
 	    count = 0;
 	}
     }
+
+    // Make sure the buffer is flushed
+    io::stdout().flush()?;
+    Ok(())
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
