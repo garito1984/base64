@@ -43,7 +43,10 @@ struct ReadBuffer {
 
 impl ReadBuffer {
     fn new(line_width: usize) -> ReadBuffer {
-	let line_width_non_zero = match line_width { 0 => DEFAULT_LINE_WIDTH, _ => line_width };
+	let line_width_non_zero = match line_width {
+	    0 => DEFAULT_LINE_WIDTH,
+	    _ => line_width
+	};
 	ReadBuffer {
 	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width_non_zero].into_boxed_slice(),
 	    line_width: line_width,
