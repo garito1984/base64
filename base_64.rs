@@ -2,6 +2,26 @@
 use std::io::{Read, Write};
 use std::io;
 
+const INPUT_BUFFER_SIZE: usize = 10;
+const DEFAULT_LINE_WIDTH: usize = 76;
+
+const BASE64_ALPHABET_PAD: char = '=';
+const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
+const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
+const BASE64_ALPHABET: [char; 65] = [
+    // Upper case characters
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    // Lower case characters
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    // Numbers
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    // Special characters
+    '+', '/', BASE64_ALPHABET_PAD
+];
+
+//
 // Test with command:
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
@@ -137,25 +157,6 @@ impl Base64Buffer {
 	Ok(())
     }
 }
-
-const INPUT_BUFFER_SIZE: usize = 10;
-const DEFAULT_LINE_WIDTH: usize = 76;
-
-const BASE64_ALPHABET_PAD: char = '=';
-const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
-const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
-const BASE64_ALPHABET: [char; 65] = [
-    // Upper case characters
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    // Lower case characters
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    // Numbers
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    // Special characters
-    '+', '/', BASE64_ALPHABET_PAD
-];
 
 //
 // Shift the quantum 8 bits to the left and copy the byte into the lower bits
