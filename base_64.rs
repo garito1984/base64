@@ -18,7 +18,7 @@ fn main() -> Result<(), io::Error> {
 	}
     }
 
-    let mut rb = ReadBuffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
+    let mut rb = Base64Buffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
     let mut base64: Vec<char> = Vec::with_capacity(rb.buf.len() + 500);
 
     while rb.read(&mut io::stdin())? > 0 {
@@ -35,19 +35,19 @@ fn main() -> Result<(), io::Error> {
     Ok(())
 }
 
-struct ReadBuffer {
+struct Base64Buffer {
     buf: Box<[u8]>,
     line_width: usize,
     read_size: usize
 }
 
-impl ReadBuffer {
-    fn new(line_width: usize) -> ReadBuffer {
+impl Base64Buffer {
+    fn new(line_width: usize) -> Base64Buffer {
 	let line_width_non_zero = match line_width {
 	    0 => DEFAULT_LINE_WIDTH,
 	    _ => line_width
 	};
-	ReadBuffer {
+	Base64Buffer {
 	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width_non_zero].into_boxed_slice(),
 	    line_width: line_width,
 	    read_size: 0
