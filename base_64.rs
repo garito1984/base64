@@ -21,7 +21,7 @@ fn main() -> Result<(), io::Error> {
     let mut rb = ReadBuffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
     let mut base64: Vec<char> = Vec::with_capacity(rb.buf.len() + 500);
 
-    while 0 < rb.read(&mut io::stdin())? {
+    while rb.read(&mut io::stdin())? > 0 {
 	// Process
 	encode(&mut rb, &mut base64);
 
