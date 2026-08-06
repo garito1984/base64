@@ -26,7 +26,7 @@ fn main() -> Result<(), io::Error> {
 	encode(&mut rb, &mut base64);
 
 	// Print the encoded version
-	print(&base64, &rb)?;
+	rb.print(&base64)?;
 
 	// Clear for next iteration
 	base64.clear();
@@ -58,6 +58,28 @@ impl ReadBuffer {
 	let size = input.read(&mut self.buf)?;
 	self.read_size = size;
 	Ok(size)
+    }
+
+    fn print(&self, base64: &Vec<char>) -> Result<(), io::Error> {
+	let disable_new_lines = 0 == self.line_width;
+	let mut count = 0;
+	for c in base64 {
+	    print!("{}", c);
+
+	    if disable_new_lines {
+		continue;
+	    }
+	    
+	    count += 1;
+	    if count == self.line_width {
+		print!("\n");
+		count = 0;
+	    }
+	}
+
+	// Make sure the buffer is flushed
+	io::stdout().flush()?;
+	Ok(())
     }
 }
 
@@ -114,28 +136,6 @@ fn encode(rb: &mut ReadBuffer, base64: &mut Vec<char>) {
 
 	i += 3; // Jump to next input quantum
     }
-}
-
-fn print(base64: &Vec<char>, rb: &ReadBuffer) -> Result<(), io::Error> {
-    let disable_new_lines = 0 == rb.line_width;
-    let mut count = 0;
-    for c in base64 {
-	print!("{}", c);
-
-	if disable_new_lines {
-	    continue;
-	}
-	
-	count += 1;
-	if count == rb.line_width {
-	    print!("\n");
-	    count = 0;
-	}
-    }
-
-    // Make sure the buffer is flushed
-    io::stdout().flush()?;
-    Ok(())
 }
 
 const BASE64_ALPHABET_PAD: char = '=';
