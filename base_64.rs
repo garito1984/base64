@@ -1,5 +1,5 @@
 
-use std::io::{Read, Write};
+use std::io::{Read};
 use std::io;
 
 const INPUT_BUFFER_SIZE: usize = 10;
@@ -52,9 +52,6 @@ fn main() -> Result<(), io::Error> {
 	// Clear for next iteration
 	base64.clear();
     }
-
-    // Make sure the buffer is flushed
-    io::stdout().flush()?;
 
     Ok(())
 }
