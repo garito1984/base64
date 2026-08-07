@@ -110,7 +110,7 @@ impl Base64Buffer {
 			BASE64_ALPHABET_PAD_INDEX
 		    )
 		},
-		_ => {
+		val if val == i+1 => {
 		    // First octet
 		    let quantum = copy_octect(0, self.buf[i+0]);
 		    // Second octet (IS EMPTY)
@@ -123,6 +123,9 @@ impl Base64Buffer {
 			BASE64_ALPHABET_PAD_INDEX,
 			BASE64_ALPHABET_PAD_INDEX
                     )
+		},
+		_ => {
+		    panic!("This should never happen");
 		}
 	    };
 
