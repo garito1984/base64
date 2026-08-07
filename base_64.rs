@@ -47,11 +47,14 @@ fn main() -> Result<(), io::Error> {
 	buf.encode(&mut base64);
 
 	// Print the encoded version
-	buf.print(&base64)?;
+	buf.print(&base64);
 
 	// Clear for next iteration
 	base64.clear();
     }
+
+    // Make sure the buffer is flushed
+    io::stdout().flush()?;
 
     Ok(())
 }
@@ -143,7 +146,7 @@ impl Base64Buffer {
 	Ok(size)
     }
 
-    fn print(&self, base64: &Vec<char>) -> Result<(), io::Error> {
+    fn print(&self, base64: &Vec<char>) {
 	let disable_new_lines = 0 == self.line_width;
 	let mut count = 0;
 	for c in base64 {
@@ -159,10 +162,6 @@ impl Base64Buffer {
 		count = 0;
 	    }
 	}
-
-	// Make sure the buffer is flushed
-	io::stdout().flush()?;
-	Ok(())
     }
 }
 
