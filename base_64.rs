@@ -78,11 +78,10 @@ impl Base64Buffer {
     fn encode(&mut self, base64: &mut Vec<char>) {
 	let mut i: usize = 0;
 	while i < self.read_size {
-	    let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
 	    let (fst, snd, trd, frt) = match self.read_size {
 		val if val == i+1 => {
 		    // First octet
-		    quantum = copy_octect(quantum, self.buf[i+0]);
+		    let quantum = copy_octect(0, self.buf[i+0]);
 		    // Second octet (IS EMPTY)
 		    // Third octet (IS EMPTY)
 
@@ -96,7 +95,7 @@ impl Base64Buffer {
 		},
 		val if val == i+2 => {
 		    // First octet
-		    quantum = copy_octect(quantum, self.buf[i+0]);
+		    let mut quantum = copy_octect(0, self.buf[i+0]);
 		    // Second octet
 		    quantum = copy_octect(quantum, self.buf[i+1]);
 		    // Third octet (IS EMPTY)
@@ -111,7 +110,7 @@ impl Base64Buffer {
 		},
 		_ => {
 		    // First octet
-		    quantum = copy_octect(quantum, self.buf[i+0]);
+		    let mut quantum = copy_octect(0, self.buf[i+0]);
 		    // Second octet
 		    quantum = copy_octect(quantum, self.buf[i+1]);
 		    // Third octet
