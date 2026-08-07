@@ -39,15 +39,15 @@ fn main() -> Result<(), io::Error> {
 	}
     }
 
-    let mut rb = Base64Buffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
-    let mut base64: Vec<char> = Vec::with_capacity(rb.buf.len() + 500);
+    let mut buf = Base64Buffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
+    let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
 
-    while rb.read(&mut io::stdin())? > 0 {
+    while buf.read(&mut io::stdin())? > 0 {
 	// Process
-	rb.encode(&mut base64);
+	buf.encode(&mut base64);
 
 	// Print the encoded version
-	rb.print(&base64)?;
+	buf.print(&base64)?;
 
 	// Clear for next iteration
 	base64.clear();
