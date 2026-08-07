@@ -79,19 +79,21 @@ impl Base64Buffer {
 	let mut i: usize = 0;
 	while i < self.read_size {
 	    let (fst, snd, trd, frt) = match self.read_size {
-		val if val == i+1 => {
+		val if val >= i+3 => {
 		    // First octet
-		    let quantum = copy_octect(0, self.buf[i+0]);
-		    // Second octet (IS EMPTY)
-		    // Third octet (IS EMPTY)
+		    let mut quantum = copy_octect(0, self.buf[i+0]);
+		    // Second octet
+		    quantum = copy_octect(quantum, self.buf[i+1]);
+		    // Third octet
+		    quantum = copy_octect(quantum, self.buf[i+2]);
 
 		    // To Base64
 		    (
-			(quantum & 0b00000000_00000000_00000000_11111100) >> 2,
-			(quantum & 0b00000000_00000000_00000000_00000011) << 4,
-			BASE64_ALPHABET_PAD_INDEX,
-			BASE64_ALPHABET_PAD_INDEX
-                    )
+			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
+			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
+			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
+			quantum & 0b00000000_00000000_00000000_00111111
+		    )
 		},
 		val if val == i+2 => {
 		    // First octet
@@ -110,19 +112,17 @@ impl Base64Buffer {
 		},
 		_ => {
 		    // First octet
-		    let mut quantum = copy_octect(0, self.buf[i+0]);
-		    // Second octet
-		    quantum = copy_octect(quantum, self.buf[i+1]);
-		    // Third octet
-		    quantum = copy_octect(quantum, self.buf[i+2]);
+		    let quantum = copy_octect(0, self.buf[i+0]);
+		    // Second octet (IS EMPTY)
+		    // Third octet (IS EMPTY)
 
 		    // To Base64
 		    (
-			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
-			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
-			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
-			 quantum & 0b00000000_00000000_00000000_00111111
-		    )
+			(quantum & 0b00000000_00000000_00000000_11111100) >> 2,
+			(quantum & 0b00000000_00000000_00000000_00000011) << 4,
+			BASE64_ALPHABET_PAD_INDEX,
+			BASE64_ALPHABET_PAD_INDEX
+                    )
 		}
 	    };
 
