@@ -76,51 +76,56 @@ impl Base64Buffer {
     }
 
     fn encode(&mut self, base64: &mut Vec<char>) {
-	let mut fst: u32 = 0;
-	let mut snd: u32 = 0;
-	let mut trd: u32 = 0;
-	let mut frt: u32 = 0;
-	
 	let mut i: usize = 0;
 	while i < self.read_size {
 	    let mut quantum: u32 = 0; // a quantum is 24 bits (three bytes)
-	    if self.read_size >= i+3 {
-		// First octet
-		quantum = copy_octect(quantum, self.buf[i+0]);
-		// Second octet
-		quantum = copy_octect(quantum, self.buf[i+1]);
-		// Third octet
-		quantum = copy_octect(quantum, self.buf[i+2]);
+	    let (fst, snd, trd, frt) = match self.read_size {
+		val if val == i+1 => {
+		    // First octet
+		    quantum = copy_octect(quantum, self.buf[i+0]);
+		    // Second octet (IS EMPTY)
+		    // Third octet (IS EMPTY)
 
-		// To Base64
-		fst = (quantum & 0b00000000_11111100_00000000_00000000) >> 18; // First char
-		snd = (quantum & 0b00000000_00000011_11110000_00000000) >> 12; // Second char
-		trd = (quantum & 0b00000000_00000000_00001111_11000000) >> 6;  // Third char
-		frt =  quantum & 0b00000000_00000000_00000000_00111111;        // Fourth char
-	    } else if self.read_size == i+2 {
-		// First octet
-		quantum = copy_octect(quantum, self.buf[i+0]);
-		// Second octet
-		quantum = copy_octect(quantum, self.buf[i+1]);
-		// Third octet (IS EMPTY)
+		    // To Base64
+		    (
+			(quantum & 0b00000000_00000000_00000000_11111100) >> 2,
+			(quantum & 0b00000000_00000000_00000000_00000011) << 4,
+			BASE64_ALPHABET_PAD_INDEX,
+			BASE64_ALPHABET_PAD_INDEX
+                    )
+		},
+		val if val == i+2 => {
+		    // First octet
+		    quantum = copy_octect(quantum, self.buf[i+0]);
+		    // Second octet
+		    quantum = copy_octect(quantum, self.buf[i+1]);
+		    // Third octet (IS EMPTY)
 
-		// To Base64
-		fst = (quantum & 0b00000000_00000000_11111100_00000000) >> 10; // First char
-		snd = (quantum & 0b00000000_00000000_00000011_11110000) >> 4;  // Second char
-		trd = (quantum & 0b00000000_00000000_00000000_00001111) << 2;  // Third char
-		frt = BASE64_ALPHABET_PAD_INDEX;                               // Fourth char
-	    } else if self.read_size == i+1 {
-		// First octet
-		quantum = copy_octect(quantum, self.buf[i+0]);
-		// Second octet (IS EMPTY)
-		// Third octet (IS EMPTY)
+		    // To Base64
+		    (
+			(quantum & 0b00000000_00000000_11111100_00000000) >> 10,
+			(quantum & 0b00000000_00000000_00000011_11110000) >> 4,
+			(quantum & 0b00000000_00000000_00000000_00001111) << 2,
+			BASE64_ALPHABET_PAD_INDEX
+		    )
+		},
+		_ => {
+		    // First octet
+		    quantum = copy_octect(quantum, self.buf[i+0]);
+		    // Second octet
+		    quantum = copy_octect(quantum, self.buf[i+1]);
+		    // Third octet
+		    quantum = copy_octect(quantum, self.buf[i+2]);
 
-		// To Base64
-		fst = (quantum & 0b00000000_00000000_00000000_11111100) >> 2; // First char
-		snd = (quantum & 0b00000000_00000000_00000000_00000011) << 4; // Second char
-		trd = BASE64_ALPHABET_PAD_INDEX;                              // Third char
-		frt = BASE64_ALPHABET_PAD_INDEX;                              // Fourth char
-	    }
+		    // To Base64
+		    (
+			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
+			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
+			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
+			 quantum & 0b00000000_00000000_00000000_00111111
+		    )
+		}
+	    };
 
 	    for index in [fst, snd, trd, frt] {
 		base64.push(BASE64_ALPHABET[index as usize]);
