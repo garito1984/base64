@@ -97,7 +97,6 @@ impl Base64Buffer {
 		snd = (quantum & 0b00000000_00000011_11110000_00000000) >> 12; // Second char
 		trd = (quantum & 0b00000000_00000000_00001111_11000000) >> 6;  // Third char
 		frt =  quantum & 0b00000000_00000000_00000000_00111111;        // Fourth char
-
 	    } else if self.read_size == i+2 {
 		// First octet
 		quantum = copy_octect(quantum, self.buf[i+0]);
