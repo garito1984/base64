@@ -2,6 +2,12 @@
 use std::io::{Read};
 use std::io;
 
+//
+// Based on RFC 4648: The Base16, Base32, and Base64 Data Encodings
+//
+// Here https://datatracker.ietf.org/doc/html/rfc4648
+//
+
 const INPUT_BUFFER_SIZE: usize = 10;
 const DEFAULT_LINE_WIDTH: usize = 76;
 
