@@ -39,7 +39,7 @@ fn main() -> Result<(), io::Error> {
 	}
     }
 
-    let mut buf = Base64Buffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH));
+    let mut buf = Base64Buffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH), &BASE64_ALPHABET);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
 
     while buf.read(&mut io::stdin())? > 0 {
@@ -56,14 +56,15 @@ fn main() -> Result<(), io::Error> {
     Ok(())
 }
 
-struct Base64Buffer {
+struct Base64Buffer<'a> {
     buf: Box<[u8]>,
     line_width: usize,
-    read_size: usize
+    read_size: usize,
+    alphabet: &'a[char]
 }
 
-impl Base64Buffer {
-    fn new(line_width: usize) -> Base64Buffer {
+impl<'a> Base64Buffer<'a> {
+    fn new(line_width: usize, alphabet: &'a[char]) -> Base64Buffer<'a> {
 	let line_width_non_zero = match line_width {
 	    0 => DEFAULT_LINE_WIDTH,
 	    _ => line_width
@@ -71,7 +72,8 @@ impl Base64Buffer {
 	Base64Buffer {
 	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width_non_zero].into_boxed_slice(),
 	    line_width: line_width,
-	    read_size: 0
+	    read_size: 0,
+	    alphabet: alphabet
 	}
     }
 
@@ -130,7 +132,7 @@ impl Base64Buffer {
 	    };
 
 	    for index in [fst, snd, trd, frt] {
-		base64.push(BASE64_ALPHABET[index as usize]);
+		base64.push(self.alphabet[index as usize]);
 	    }
 
 	    i += 3; // Jump to next input quantum
