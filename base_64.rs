@@ -68,9 +68,9 @@ fn main() -> Result<(), io::Error> {
 const ARG_WIDTH: &str = "-w";
 const ARG_ALPHABET_URL: &str = "--url";
 enum AppArg {
-    Flag(String, bool),
+    Flag(bool),
     NumArg(String, usize),
-    StrArg(String, Option<String>),
+    _StrArg(String, Option<String>),
     _FileArg(String, String),
     None
 }
@@ -79,7 +79,7 @@ fn args<'a>() -> (usize, &'a[char]) {
     // Load valid arguments with default values if any apply
     let mut valid_args: HashMap<String, AppArg> = HashMap::from([
 	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
-	(ARG_ALPHABET_URL.to_string(), AppArg::Flag(ARG_ALPHABET_URL.to_string(), false))
+	(ARG_ALPHABET_URL.to_string(), AppArg::Flag(false))
     ]);
     
     // Update the configuration if any relevant arguments are given
@@ -87,14 +87,14 @@ fn args<'a>() -> (usize, &'a[char]) {
     for arg in std::env::args() {
 	if let AppArg::None = prev_arg {
 	    match valid_args.get(&arg) {
-		Some(AppArg::Flag(_, _)) => {
-		    valid_args.insert(arg.clone(), AppArg::Flag(arg.clone(), true));
+		Some(AppArg::Flag(_)) => {
+		    valid_args.insert(arg.clone(), AppArg::Flag(true));
 		},
 		Some(AppArg::NumArg(_, val)) => {
 		    prev_arg = AppArg::NumArg(arg, *val);
 		},
-		Some(AppArg::StrArg(_, _)) => {
-		    prev_arg = AppArg::StrArg(arg, None);
+		Some(AppArg::_StrArg(_, _)) => {
+		    prev_arg = AppArg::_StrArg(arg, None);
 		},
 		_ => {
 		    //eprintln!("Unknown argument: {}", arg);
@@ -106,8 +106,8 @@ fn args<'a>() -> (usize, &'a[char]) {
 		AppArg::NumArg(s, _) => {
 		    valid_args.insert(s.clone(), AppArg::NumArg(s.clone(), arg.parse().expect("Width should be a number")));
 		},
-		AppArg::StrArg(s, _) => {
-		    valid_args.insert(s.clone(), AppArg::StrArg(s.clone(), Some(arg)));
+		AppArg::_StrArg(s, _) => {
+		    valid_args.insert(s.clone(), AppArg::_StrArg(s.clone(), Some(arg)));
 		},
 		_ => {}
 	    };
@@ -119,7 +119,7 @@ fn args<'a>() -> (usize, &'a[char]) {
     let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
 	panic!("The width argument requires a parameter")
     };
-    let Some(AppArg::Flag(_, is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
+    let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
 	panic!("An error took place with url alphabet argument");
     };
 
