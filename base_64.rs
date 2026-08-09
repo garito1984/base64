@@ -115,13 +115,15 @@ fn args<'a>() -> (usize, &'a[char]) {
 	}
     }
 
-    // Return the results as a tuple
+    // Extract the final app configuration
     let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
 	panic!("The width argument requires a parameter")
     };
     let Some(AppArg::Flag(_, is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
 	panic!("An error took place with url alphabet argument");
     };
+
+    // Return the config as a tuple
     (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET})
 }
 
