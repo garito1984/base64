@@ -66,7 +66,7 @@ fn main() -> Result<(), io::Error> {
 }
 
 const ARG_WIDTH: &str = "-w";
-const ARG_URL_ALPHABET: &str = "--url";
+const ARG_ALPHABET_URL: &str = "--url";
 enum AppArg {
     Flag(String, bool),
     NumArg(String, usize),
@@ -76,10 +76,13 @@ enum AppArg {
 }
 
 fn args<'a>() -> (usize, &'a[char]) {
+    // Load valid arguments with default values if any apply
     let mut valid_args: HashMap<String, AppArg> = HashMap::from([
 	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
-	(ARG_URL_ALPHABET.to_string(), AppArg::Flag(ARG_URL_ALPHABET.to_string(), false))
+	(ARG_ALPHABET_URL.to_string(), AppArg::Flag(ARG_ALPHABET_URL.to_string(), false))
     ]);
+    
+    // Update the configuration if any relevant arguments are given
     let mut prev_arg: AppArg = AppArg::None;
     for arg in std::env::args() {
 	if let AppArg::None = prev_arg {
@@ -112,13 +115,14 @@ fn args<'a>() -> (usize, &'a[char]) {
 	}
     }
 
-    (
-	if let Some(AppArg::NumArg(_, val)) = valid_args.get(ARG_WIDTH) {*val} else {DEFAULT_LINE_WIDTH},
-	match valid_args.get(ARG_URL_ALPHABET) {
-	    Some(AppArg::Flag(_, val)) if *val => {&BASE64_ALPHABET_URL},
-	    _ => {&BASE64_ALPHABET}
-	}
-    )
+    // Return the results as a tuple
+    let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
+	panic!("The width argument requires a parameter")
+    };
+    let Some(AppArg::Flag(_, is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
+	panic!("An error took place with url alphabet argument");
+    };
+    (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET})
 }
 
 struct Base64Buffer<'a> {
