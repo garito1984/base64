@@ -1,6 +1,7 @@
 
 use std::io::{Read};
 use std::io;
+use std::collections::{HashMap};
 
 //
 // Based on RFC 4648: The Base16, Base32, and Base64 Data Encodings
@@ -27,8 +28,7 @@ const BASE64_ALPHABET: [char; 65] = [
     // Special characters
     '+', '/', BASE64_ALPHABET_PAD
 ];
-
-const BASE64_ALPHABET_URL_FILENAME_SAFE: [char; 65] = [
+const BASE64_ALPHABET_URL: [char; 65] = [
     // Upper case characters
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -46,19 +46,9 @@ const BASE64_ALPHABET_URL_FILENAME_SAFE: [char; 65] = [
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> Result<(), io::Error> {
-    
-    let mut line_width_flag = false;
-    let mut line_width_value: Option<usize> = None;
-    for arg in std::env::args() {
-	if arg == "-w" {
-	    line_width_flag = true;
-	} else if line_width_flag {
-	    line_width_value = Some(arg.parse::<usize>().unwrap());
-	    break;
-	}
-    }
+    let (arg_width, url_alphabet) = args();
 
-    let mut buf = Base64Buffer::new(line_width_value.unwrap_or(DEFAULT_LINE_WIDTH), &BASE64_ALPHABET);
+    let mut buf = Base64Buffer::new(arg_width, url_alphabet);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
 
     while buf.read(&mut io::stdin())? > 0 {
@@ -73,6 +63,62 @@ fn main() -> Result<(), io::Error> {
     }
 
     Ok(())
+}
+
+const ARG_WIDTH: &str = "-w";
+const ARG_URL_ALPHABET: &str = "--url";
+enum AppArg {
+    Flag(String, bool),
+    NumArg(String, usize),
+    StrArg(String, Option<String>),
+    _FileArg(String, String),
+    None
+}
+
+fn args<'a>() -> (usize, &'a[char]) {
+    let mut valid_args: HashMap<String, AppArg> = HashMap::from([
+	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
+	(ARG_URL_ALPHABET.to_string(), AppArg::Flag(ARG_URL_ALPHABET.to_string(), false))
+    ]);
+    let mut prev_arg: AppArg = AppArg::None;
+    for arg in std::env::args() {
+	if let AppArg::None = prev_arg {
+	    match valid_args.get(&arg) {
+		Some(AppArg::Flag(_, _)) => {
+		    valid_args.insert(arg.clone(), AppArg::Flag(arg.clone(), true));
+		},
+		Some(AppArg::NumArg(_, val)) => {
+		    prev_arg = AppArg::NumArg(arg, *val);
+		},
+		Some(AppArg::StrArg(_, _)) => {
+		    prev_arg = AppArg::StrArg(arg, None);
+		},
+		_ => {
+		    //eprintln!("Unknown argument: {}", arg);
+		}
+	    }
+	} else {
+	    // Previously there was a parameterized arg, now we get the value
+	    match prev_arg {
+		AppArg::NumArg(s, _) => {
+		    valid_args.insert(s.clone(), AppArg::NumArg(s.clone(), arg.parse().expect("Width should be a number")));
+		},
+		AppArg::StrArg(s, _) => {
+		    valid_args.insert(s.clone(), AppArg::StrArg(s.clone(), Some(arg)));
+		},
+		_ => {}
+	    };
+	    prev_arg = AppArg::None;
+	}
+    }
+
+    (
+	if let Some(AppArg::NumArg(_, val)) = valid_args.get(ARG_WIDTH) {*val} else {DEFAULT_LINE_WIDTH},
+	match valid_args.get(ARG_URL_ALPHABET) {
+	    Some(AppArg::Flag(_, val)) if *val => {&BASE64_ALPHABET_URL},
+	    _ => {&BASE64_ALPHABET}
+	}
+    )
 }
 
 struct Base64Buffer<'a> {
