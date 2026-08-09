@@ -46,9 +46,9 @@ const BASE64_ALPHABET_URL: [char; 65] = [
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> Result<(), io::Error> {
-    let (arg_width, url_alphabet) = args();
+    let (width, alphabet) = args();
 
-    let mut buf = Base64Buffer::new(arg_width, url_alphabet);
+    let mut buf = Base64Buffer::new(width, alphabet);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
 
     while buf.read(&mut io::stdin())? > 0 {
