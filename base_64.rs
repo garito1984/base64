@@ -175,9 +175,9 @@ impl<'a> Base64Buffer<'a> {
 		    
 		    let quantum = {
 			// First octet
-			let mut q copy_octect(0, self.buf[i+0]);
+			let q = copy_octect(0, self.buf[i+0]);
 			// Second octet
-			copy_octect(q, self.buf[i+1]);
+			copy_octect(q, self.buf[i+1])
 			// Third octet (IS EMPTY)
 		    };
 
