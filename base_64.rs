@@ -253,7 +253,6 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
 	panic!("An error took place with url alphabet argument");
     };
-    
     let filename = {
 	let last_unk_arg = unknown_args.last().map(String::to_string);
 	let last_env_arg = std::env::args().last();
