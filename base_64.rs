@@ -46,7 +46,7 @@ const BASE64_ALPHABET_URL: [char; 65] = [
 // rustc base_64.rs && echo -n "g" | ./base_64 | base64 -d
 //
 fn main() -> Result<(), io::Error> {
-    let (width, alphabet) = args();
+    let (width, alphabet, filename) = args();
 
     let mut buf = Base64Buffer::new(width, alphabet);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
@@ -75,7 +75,7 @@ enum AppArg {
     None
 }
 
-fn args<'a>() -> (usize, &'a[char]) {
+fn args<'a>() -> (usize, &'a[char], Option<String>) {
     // Load valid arguments with default values if any apply
     let mut valid_args: HashMap<String, AppArg> = HashMap::from([
 	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
@@ -84,6 +84,7 @@ fn args<'a>() -> (usize, &'a[char]) {
     
     // Update the configuration if any relevant arguments are given
     let mut prev_arg: AppArg = AppArg::None;
+    let mut unknown_args: Vec<String> = Vec::new();
     for arg in std::env::args() {
 	if let AppArg::None = prev_arg {
 	    match valid_args.get(&arg) {
@@ -97,7 +98,7 @@ fn args<'a>() -> (usize, &'a[char]) {
 		    prev_arg = AppArg::_StrArg(arg, None);
 		},
 		_ => {
-		    //eprintln!("Unknown argument: {}", arg);
+		    unknown_args.push(arg)
 		}
 	    }
 	} else {
@@ -122,9 +123,26 @@ fn args<'a>() -> (usize, &'a[char]) {
     let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
 	panic!("An error took place with url alphabet argument");
     };
+    
+    let filename = {
+	let arg1 = unknown_args.last();
+	let arg2 = std::env::args().last();
+	
+	if unknown_args.len() > 1 && arg1.is_some() && arg2.is_some() {
+	    let arg1 = arg1.unwrap();
+	    let arg2 = arg2.unwrap();
+	    if *arg1 == arg2 {
+		Some(arg2)
+	    } else {
+		None
+	    }
+	} else {
+	    None
+	}
+    };
 
     // Return the config as a tuple
-    (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET})
+    (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET}, filename)
 }
 
 struct Base64Buffer<'a> {
@@ -168,7 +186,7 @@ impl<'a> Base64Buffer<'a> {
 			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
 			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
 			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
-			 quantum & 0b00000000_00000000_00000000_00111111
+			quantum & 0b00000000_00000000_00000000_00111111
 		    )
 		},
 		val if val == i+2 => {
