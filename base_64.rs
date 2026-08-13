@@ -48,6 +48,10 @@ const BASE64_ALPHABET_URL: [char; 65] = [
 fn main() -> Result<(), io::Error> {
     let (width, alphabet, filename) = args();
 
+    if let Some(f) = filename {
+	eprintln!("**** {}", f);
+    }
+
     let mut buf = Base64Buffer::new(width, alphabet);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
 
@@ -125,17 +129,11 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     };
     
     let filename = {
-	let arg1 = unknown_args.last();
+	let arg1 = unknown_args.last().map(|x| x.to_string());
 	let arg2 = std::env::args().last();
 	
-	if unknown_args.len() > 1 && arg1.is_some() && arg2.is_some() {
-	    let arg1 = arg1.unwrap();
-	    let arg2 = arg2.unwrap();
-	    if *arg1 == arg2 {
-		Some(arg2)
-	    } else {
-		None
-	    }
+	if arg1 == arg2 {
+	    arg1
 	} else {
 	    None
 	}
