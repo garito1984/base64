@@ -129,7 +129,7 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     };
     
     let filename = {
-	let arg1 = unknown_args.last().map(|x| x.to_string());
+	let arg1 = unknown_args.last().map(String::to_string);
 	let arg2 = std::env::args().last();
 	
 	if arg1 == arg2 {
@@ -184,7 +184,7 @@ impl<'a> Base64Buffer<'a> {
 			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
 			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
 			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
-			quantum & 0b00000000_00000000_00000000_00111111
+			 quantum & 0b00000000_00000000_00000000_00111111
 		    )
 		},
 		val if val == i+2 => {
