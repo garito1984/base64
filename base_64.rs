@@ -69,80 +69,6 @@ fn main() -> Result<(), io::Error> {
     Ok(())
 }
 
-const ARG_WIDTH: &str = "-w";
-const ARG_ALPHABET_URL: &str = "--url";
-enum AppArg {
-    Flag(bool),
-    NumArg(String, usize),
-    _StrArg(String, Option<String>),
-    _FileArg(String, String),
-    None
-}
-
-fn args<'a>() -> (usize, &'a[char], Option<String>) {
-    // Load valid arguments with default values if any apply
-    let mut valid_args: HashMap<String, AppArg> = HashMap::from([
-	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
-	(ARG_ALPHABET_URL.to_string(), AppArg::Flag(false))
-    ]);
-    
-    // Update the configuration if any relevant arguments are given
-    let mut prev_arg: AppArg = AppArg::None;
-    let mut unknown_args: Vec<String> = Vec::new();
-    for arg in std::env::args() {
-	if let AppArg::None = prev_arg {
-	    match valid_args.get(&arg) {
-		Some(AppArg::Flag(_)) => {
-		    valid_args.insert(arg.clone(), AppArg::Flag(true));
-		},
-		Some(AppArg::NumArg(_, val)) => {
-		    prev_arg = AppArg::NumArg(arg, *val);
-		},
-		Some(AppArg::_StrArg(_, _)) => {
-		    prev_arg = AppArg::_StrArg(arg, None);
-		},
-		_ => {
-		    unknown_args.push(arg)
-		}
-	    }
-	} else {
-	    // Previously there was a parameterized arg, now we get the value
-	    match prev_arg {
-		AppArg::NumArg(s, _) => {
-		    valid_args.insert(s.clone(), AppArg::NumArg(s.clone(), arg.parse().expect("Width should be a number")));
-		},
-		AppArg::_StrArg(s, _) => {
-		    valid_args.insert(s.clone(), AppArg::_StrArg(s.clone(), Some(arg)));
-		},
-		_ => {}
-	    };
-	    prev_arg = AppArg::None;
-	}
-    }
-
-    // Extract the final app configuration
-    let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
-	panic!("The width argument requires a parameter")
-    };
-    let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
-	panic!("An error took place with url alphabet argument");
-    };
-    
-    let filename = {
-	let last_unk_arg = unknown_args.last().map(String::to_string);
-	let last_env_arg = std::env::args().last();
-	
-	if last_unk_arg == last_env_arg {
-	    last_unk_arg
-	} else {
-	    None
-	}
-    };
-
-    // Return the config as a tuple
-    (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET}, filename)
-}
-
 struct Base64Buffer<'a> {
     buf: Box<[u8]>,
     line_width: usize,
@@ -265,3 +191,81 @@ impl<'a> Base64Buffer<'a> {
 fn copy_octect(quantum: u32, byte: u8) -> u32 {
     (quantum << 8) | byte as u32
 }
+
+//
+// Parse application arguments
+//
+const ARG_WIDTH: &str = "-w";
+const ARG_ALPHABET_URL: &str = "--url";
+enum AppArg {
+    Flag(bool),
+    NumArg(String, usize),
+    _StrArg(String, Option<String>),
+    _FileArg(String, String),
+    None
+}
+
+fn args<'a>() -> (usize, &'a[char], Option<String>) {
+    // Load valid arguments with default values if any apply
+    let mut valid_args: HashMap<String, AppArg> = HashMap::from([
+	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
+	(ARG_ALPHABET_URL.to_string(), AppArg::Flag(false))
+    ]);
+    
+    // Update the configuration if any relevant arguments are given
+    let mut prev_arg: AppArg = AppArg::None;
+    let mut unknown_args: Vec<String> = Vec::new();
+    for arg in std::env::args() {
+	if let AppArg::None = prev_arg {
+	    match valid_args.get(&arg) {
+		Some(AppArg::Flag(_)) => {
+		    valid_args.insert(arg.clone(), AppArg::Flag(true));
+		},
+		Some(AppArg::NumArg(_, val)) => {
+		    prev_arg = AppArg::NumArg(arg, *val);
+		},
+		Some(AppArg::_StrArg(_, _)) => {
+		    prev_arg = AppArg::_StrArg(arg, None);
+		},
+		_ => {
+		    unknown_args.push(arg)
+		}
+	    }
+	} else {
+	    // Previously there was a parameterized arg, now we get the value
+	    match prev_arg {
+		AppArg::NumArg(s, _) => {
+		    valid_args.insert(s.clone(), AppArg::NumArg(s.clone(), arg.parse().expect("Width should be a number")));
+		},
+		AppArg::_StrArg(s, _) => {
+		    valid_args.insert(s.clone(), AppArg::_StrArg(s.clone(), Some(arg)));
+		},
+		_ => {}
+	    };
+	    prev_arg = AppArg::None;
+	}
+    }
+
+    // Extract the final app configuration
+    let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
+	panic!("The width argument requires a parameter")
+    };
+    let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
+	panic!("An error took place with url alphabet argument");
+    };
+    
+    let filename = {
+	let last_unk_arg = unknown_args.last().map(String::to_string);
+	let last_env_arg = std::env::args().last();
+	
+	if last_unk_arg == last_env_arg {
+	    last_unk_arg
+	} else {
+	    None
+	}
+    };
+
+    // Return the config as a tuple
+    (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET}, filename)
+}
+
