@@ -129,11 +129,11 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     };
     
     let filename = {
-	let arg1 = unknown_args.last().map(String::to_string);
-	let arg2 = std::env::args().last();
+	let last_unk_arg = unknown_args.last().map(String::to_string);
+	let last_env_arg = std::env::args().last();
 	
-	if arg1 == arg2 {
-	    arg1
+	if last_unk_arg == last_env_arg {
+	    last_unk_arg
 	} else {
 	    None
 	}
