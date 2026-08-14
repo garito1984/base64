@@ -250,8 +250,10 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
 	panic!("The width argument requires a parameter")
     };
-    let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
-	panic!("An error took place with url alphabet argument");
+    //let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
+    let url = match valid_args.get(ARG_ALPHABET_URL) {
+	Some(AppArg::Flag(is_url)) if *is_url => &BASE64_ALPHABET_URL,
+	_ => &BASE64_ALPHABET
     };
     let filename = {
 	let last_unk_arg = unknown_args.last().map(String::to_string);
@@ -261,6 +263,6 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     };
 
     // Return the config as a tuple
-    (*width, if *is_url {&BASE64_ALPHABET_URL} else {&BASE64_ALPHABET}, filename)
+    (*width, url, filename)
 }
 
