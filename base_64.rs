@@ -250,7 +250,6 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
     let Some(AppArg::NumArg(_, width)) = valid_args.get(ARG_WIDTH) else {
 	panic!("The width argument requires a parameter")
     };
-    //let Some(AppArg::Flag(is_url)) = valid_args.get(ARG_ALPHABET_URL) else {
     let url = match valid_args.get(ARG_ALPHABET_URL) {
 	Some(AppArg::Flag(is_url)) if *is_url => &BASE64_ALPHABET_URL,
 	_ => &BASE64_ALPHABET
