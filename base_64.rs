@@ -1,6 +1,6 @@
 
-use std::io::{Read};
 use std::io;
+use std::fs;
 use std::collections::{HashMap};
 
 //
@@ -48,14 +48,21 @@ const BASE64_ALPHABET_URL: [char; 65] = [
 fn main() -> Result<(), io::Error> {
     let (width, alphabet, filename) = args();
 
-    if let Some(f) = filename {
-	eprintln!("**** {}", f);
+    let mut file: fs::File;
+    let mut stdin: io::Stdin;
+    let input: &mut dyn io::Read;
+    if let Some(filename) = filename {
+	file = fs::File::open(filename)?;
+	input = &mut file;
+    } else {
+	stdin = io::stdin();
+	input = &mut stdin;
     }
 
     let mut buf = Base64Buffer::new(width, alphabet);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
 
-    while buf.read(&mut io::stdin())? > 0 {
+    while buf.read(input)? > 0 {
 	// Process
 	buf.encode(&mut base64);
 
@@ -158,7 +165,7 @@ impl<'a> Base64Buffer<'a> {
 	}
     }
 
-    fn read(&mut self, input: &mut dyn Read) -> Result<usize, io::Error> {
+    fn read(&mut self, input: &mut dyn io::Read) -> Result<usize, io::Error> {
 	let size = input.read(&mut self.buf)?;
 	self.read_size = size;
 	Ok(size)
