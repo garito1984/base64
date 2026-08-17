@@ -8,6 +8,8 @@ use std::collections::{HashMap};
 //
 // Here https://datatracker.ietf.org/doc/html/rfc4648
 //
+// cargo run -- Cargo.toml
+//
 
 const INPUT_BUFFER_SIZE: usize = 10;
 const DEFAULT_LINE_WIDTH: usize = 76;
