@@ -119,7 +119,7 @@ impl<'a> Base64Buffer<'a> {
 			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
 			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
 			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
-			 quantum & 0b00000000_00000000_00000000_00111111
+			quantum & 0b00000000_00000000_00000000_00111111
 		    )
 		},
 		val if val == i+2 => {
@@ -264,10 +264,14 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
 	_ => &BASE64_ALPHABET
     };
     let filename = {
-	let last_unk_arg = unknown_args.last().map(String::to_string);
-	let last_env_arg = std::env::args().last();
-	
-	(last_unk_arg == last_env_arg).then_some(last_unk_arg).flatten()
+	if std::env::args().count() > 1 {
+	    let last_unk_arg = unknown_args.last().map(String::to_string);
+	    let last_env_arg = std::env::args().last();
+	    
+	    (last_unk_arg == last_env_arg).then_some(last_unk_arg).flatten()
+	} else {
+	    None
+	}
     };
 
     // Return the config as a tuple
