@@ -50,12 +50,10 @@ const BASE64_ALPHABET_URL: [char; 65] = [
 fn main() -> Result<(), io::Error> {
     let (width, alphabet, filename) = args();
 
-    let mut input: Box<dyn io::Read>;
-    if let Some(filename) = filename {
-	input = Box::new(fs::File::open(filename)?);
-    } else {
-	input = Box::new(io::stdin());
-    }
+    let mut input: Box<dyn io::Read> = match filename {
+	Some(filename) => Box::new(fs::File::open(filename)?),
+	_ => Box::new(io::stdin())
+    };
 
     let mut buf = Base64Buffer::new(width, alphabet);
     let mut base64: Vec<char> = Vec::with_capacity(buf.buf.len() + 500);
