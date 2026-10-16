@@ -161,7 +161,7 @@ impl<'a> Base64Buffer<'a> {
 	}
     }
 
-    fn read(&mut self, input: &mut Box<dyn io::Read>) -> Result<usize, io::Error> {
+    fn read(&mut self, input: &mut dyn io::Read) -> Result<usize, io::Error> {
 	let size = input.read(&mut self.buf)?;
 	self.read_size = size;
 	Ok(size)
