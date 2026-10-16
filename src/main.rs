@@ -254,18 +254,17 @@ fn args<'a>() -> (usize, &'a[char], Option<String>) {
 	panic!("The width argument requires a parameter")
     };
     let url = match valid_args.get(ARG_ALPHABET_URL) {
-	Some(AppArg::Flag(is_url)) if *is_url => &BASE64_ALPHABET_URL,
+	Some(AppArg::Flag(true)) => &BASE64_ALPHABET_URL,
 	_ => &BASE64_ALPHABET
     };
-    let filename = {
-	if std::env::args().count() > 1 {
+    let filename = match std::env::args().count() {
+	1.. => {
 	    let last_unk_arg = unknown_args.last().map(String::to_string);
 	    let last_env_arg = std::env::args().last();
 	    
 	    (last_unk_arg == last_env_arg).then_some(last_unk_arg).flatten()
-	} else {
-	    None
-	}
+	},
+	_ => None
     };
 
     // Return the config as a tuple
