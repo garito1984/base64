@@ -56,7 +56,7 @@ enum AppArg {
     None
 }
 
-fn args<'a>() -> (usize, bool, Option<String>) {
+fn args() -> (usize, bool, Option<String>) {
     // Load valid arguments with default values if any apply
     let mut valid_args: HashMap<String, AppArg> = HashMap::from([
 	(ARG_WIDTH.to_string(), AppArg::NumArg(ARG_WIDTH.to_string(), DEFAULT_LINE_WIDTH)),
