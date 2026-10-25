@@ -61,10 +61,12 @@ fn args() -> (usize, bool, Option<String>) {
 	    ARG_WIDTH => partial = Some(arg.to_string()),
 	    ARG_ALPHABET_URL => url = true,
 	    _ => {
+		// Complete the option with its argument if possible 
 		match partial {
 		    Some(ref s) if ARG_WIDTH == s.as_str() => width = arg.parse().expect("Width should be a number"),
 		    _ => unknown = Some(arg)
 		}
+		partial = None;
 	    }
 	}
     }
