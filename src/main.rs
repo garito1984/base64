@@ -57,17 +57,19 @@ fn args() -> (usize, bool, Option<String>) {
     // Update the configuration if any relevant arguments are given
     let mut partial: Option<String> = None;
     for arg in std::env::args() {
-	match arg.as_str() {
-	    ARG_WIDTH => partial = Some(arg.to_string()),
-	    ARG_ALPHABET_URL => url = true,
-	    _ => {
-		// Complete the option with its argument if possible 
-		match partial {
-		    Some(ref s) if ARG_WIDTH == s.as_str() => width = arg.parse().expect("Width should be a number"),
-		    _ => unknown = Some(arg)
-		}
-		partial = None;
-	    }
+	let mut reset_partial = true;
+	match (arg.as_str(), partial.as_deref()) {
+	    // Url
+	    (ARG_ALPHABET_URL, _) => url = true,
+	    // Width
+	    (ARG_WIDTH, _) => (partial, reset_partial) = (Some(arg), false),
+	    (_, Some(ARG_WIDTH)) => width = arg.parse().expect("Width should be a number"),
+	    // No matching option
+	    _ => unknown = Some(arg)
+	}
+
+	if reset_partial {
+	    partial = None
 	}
     }
 
