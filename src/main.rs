@@ -8,10 +8,9 @@ use std::fs;
 //
 // Here https://datatracker.ietf.org/doc/html/rfc4648
 //
-// cargo run -- Cargo.toml
-//
 
-const DEFAULT_LINE_WIDTH: usize = 76;
+const ARG_WIDTH: &str = "-w";
+const ARG_ALPHABET_URL: &str = "--url";
 
 //
 // Test with command:
@@ -22,7 +21,7 @@ fn main() -> Result<(), io::Error> {
 
     let mut input: Box<dyn io::Read> = match filename {
 	Some(filename) => Box::new(fs::File::open(filename)?),
-	_ => Box::new(io::stdin())
+	None => Box::new(io::stdin())
     };
 
     let mut buf = base64::Base64Buffer::new(width, is_url);
@@ -45,8 +44,8 @@ fn main() -> Result<(), io::Error> {
 //
 // Parse application arguments
 //
-const ARG_WIDTH: &str = "-w";
-const ARG_ALPHABET_URL: &str = "--url";
+
+const DEFAULT_LINE_WIDTH: usize = 76;
 
 fn args() -> (usize, bool, Option<String>) {
     // Default config
