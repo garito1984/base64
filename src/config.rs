@@ -51,7 +51,7 @@ mod tests {
 	let args = vec![
             String::from("./pretend-there-is-an-executable")
 	];
-        assert_eq!(arguments(args), (DEFAULT_LINE_WIDTH, false, None));
+        assert_eq!((DEFAULT_LINE_WIDTH, false, None), arguments(args));
     }
 
     #[test]
@@ -60,7 +60,7 @@ mod tests {
             String::from("./pretend-this-is-an-executable"),
             String::from(ARG_ALPHABET_URL)
 	];
-        assert_eq!(arguments(args), (DEFAULT_LINE_WIDTH, true, None));
+        assert_eq!((DEFAULT_LINE_WIDTH, true, None), arguments(args));
     }
 
     #[test]
@@ -70,8 +70,7 @@ mod tests {
             String::from(ARG_WIDTH),
 	    String::from("99")
 	];
-        let (width, _, _) = arguments(args);
-        assert_eq!(width, 99);
+        assert_eq!((99 as usize, false, None), arguments(args));
     }
     
     #[test]
@@ -82,7 +81,7 @@ mod tests {
 	    String::from("99"),
 	    String::from("a-file.txt")
 	];
-        assert_eq!(arguments(args), (99 as usize, false, Some("a-file.txt".to_string())));
+        assert_eq!((99 as usize, false, Some("a-file.txt".to_string())), arguments(args));
     }
 
     #[test]
@@ -94,6 +93,6 @@ mod tests {
 	    String::from(ARG_ALPHABET_URL),
 	    String::from("a-file.txt")
 	];
-        assert_eq!(arguments(args), (99 as usize, true, Some("a-file.txt".to_string())));
+        assert_eq!((99 as usize, true, Some("a-file.txt".to_string())), arguments(args));
     }
 }
