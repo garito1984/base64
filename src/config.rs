@@ -9,11 +9,10 @@ const DEFAULT_LINE_WIDTH: usize = 76;
 
 pub fn args() -> (usize, bool, Option<String>) {
     let args = std::env::args().into_iter();
-    let count = std::env::args().count();
-    arguments(args.into_iter().skip(1), count)
+    arguments(args.into_iter().skip(1))
 }
 
-fn arguments<I>(iter: I, args_count: usize) -> (usize, bool, Option<String>)
+fn arguments<I>(iter: I) -> (usize, bool, Option<String>)
 where
     I: IntoIterator<Item = String>,
  {
@@ -41,12 +40,7 @@ where
 	}
     }
 
-    let filename = match args_count {
-	2.. => unknown,
-	_ => None
-    };
-
-    (width, url, filename)
+    (width, url, unknown)
 }
 
 #[cfg(test)]
@@ -58,8 +52,7 @@ mod tests {
 	let args = vec![
             String::from("./pretend-there-is-an-executable")
 	];
-	let count = args.len();
-        assert_eq!(arguments(args.into_iter(), count), (DEFAULT_LINE_WIDTH, false, None));
+        assert_eq!(arguments(args.into_iter().skip(1)), (DEFAULT_LINE_WIDTH, false, None));
     }
 
     #[test]
@@ -68,8 +61,7 @@ mod tests {
             String::from("./pretend-this-is-an-executable"),
             String::from(ARG_ALPHABET_URL)
 	];
-	let count = args.len();
-        assert_eq!(arguments(args.into_iter().skip(1), count), (DEFAULT_LINE_WIDTH, true, None));
+        assert_eq!(arguments(args.into_iter().skip(1)), (DEFAULT_LINE_WIDTH, true, None));
     }
 
     #[test]
@@ -79,8 +71,7 @@ mod tests {
             String::from(ARG_WIDTH),
 	    String::from("99")
 	];
-	let count = args.len();
-        let (width, _, _) = arguments(args.into_iter(), count);
+        let (width, _, _) = arguments(args.into_iter());
         assert_eq!(width, 99);
     }
     
@@ -92,8 +83,7 @@ mod tests {
 	    String::from("99"),
 	    String::from("a-file.txt")
 	];
-	let count = args.len();
-        assert_eq!(arguments(args.into_iter(), count), (99 as usize, false, Some("a-file.txt".to_string())));
+        assert_eq!(arguments(args.into_iter()), (99 as usize, false, Some("a-file.txt".to_string())));
     }
 
     #[test]
@@ -105,7 +95,6 @@ mod tests {
 	    String::from(ARG_ALPHABET_URL),
 	    String::from("a-file.txt")
 	];
-	let count = args.len();
-        assert_eq!(arguments(args.into_iter(), count), (99 as usize, true, Some("a-file.txt".to_string())));
+        assert_eq!(arguments(args.into_iter()), (99 as usize, true, Some("a-file.txt".to_string())));
     }
 }
