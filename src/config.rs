@@ -9,10 +9,10 @@ const DEFAULT_LINE_WIDTH: usize = 76;
 
 pub fn args() -> (usize, bool, Option<String>) {
     let args = std::env::args().into_iter();
-    arguments(args.into_iter().skip(1))
+    arguments(args.into_iter())
 }
 
-fn arguments<I>(iter: I) -> (usize, bool, Option<String>)
+fn arguments<I>(env_args: I) -> (usize, bool, Option<String>)
 where
     I: IntoIterator<Item = String>,
  {
@@ -23,7 +23,7 @@ where
     
     // Update the configuration if any relevant arguments are given
     let mut partial: Option<String> = None;
-    for arg in iter {
+    for arg in env_args.into_iter().skip(1) {
 	let reset_partial = partial.is_some();
 	match (arg.as_str(), partial.as_deref()) {
 	    // Url
@@ -52,7 +52,7 @@ mod tests {
 	let args = vec![
             String::from("./pretend-there-is-an-executable")
 	];
-        assert_eq!(arguments(args.into_iter().skip(1)), (DEFAULT_LINE_WIDTH, false, None));
+        assert_eq!(arguments(args.into_iter()), (DEFAULT_LINE_WIDTH, false, None));
     }
 
     #[test]
@@ -61,7 +61,7 @@ mod tests {
             String::from("./pretend-this-is-an-executable"),
             String::from(ARG_ALPHABET_URL)
 	];
-        assert_eq!(arguments(args.into_iter().skip(1)), (DEFAULT_LINE_WIDTH, true, None));
+        assert_eq!(arguments(args.into_iter()), (DEFAULT_LINE_WIDTH, true, None));
     }
 
     #[test]
