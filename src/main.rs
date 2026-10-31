@@ -14,7 +14,13 @@ use std::fs;
 // echo -n "g" | ./main | base64 -d
 //
 fn main() -> Result<(), io::Error> {
-     let (width, is_url, filename) = config::args();
+    let (width, is_url, filename) = match config::args() {
+	Ok(args) => args,
+	Err(msg) => {
+	    println!("Bad arguments: {msg}");
+	    std::process::exit(1);
+	}
+    };
 
     let mut input: Box<dyn io::Read> = match filename {
 	Some(filename) => Box::new(fs::File::open(filename)?),
