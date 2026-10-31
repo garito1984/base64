@@ -1,5 +1,9 @@
+use std::str::{FromStr};
+
 const ARG_WIDTH: &str = "-w";
 const ARG_ALPHABET_URL: &str = "--url";
+
+const ARG_WIDTH_ERROR_MSG: &str = "Width argument has to be a number";
 
 //
 // Parse application arguments
@@ -7,11 +11,11 @@ const ARG_ALPHABET_URL: &str = "--url";
 
 const DEFAULT_LINE_WIDTH: usize = 76;
 
-pub fn args() -> (usize, bool, Option<String>) {
+pub fn args() -> Result<(usize, bool, Option<String>), String> {
     arguments(std::env::args())
 }
 
-fn arguments<I>(env_args: I) -> (usize, bool, Option<String>)
+fn arguments<I>(env_args: I) -> Result<(usize, bool, Option<String>), String>
 where
     I: IntoIterator<Item = String>,
  {
@@ -29,7 +33,12 @@ where
 	    (ARG_ALPHABET_URL, _) => url = true,
 	    // Width
 	    (ARG_WIDTH, _) => partial = Some(arg),
-	    (_, Some(ARG_WIDTH)) => width = arg.parse().expect("Width should be a number"),
+	    (_, Some(ARG_WIDTH)) => {
+		match usize::from_str(&arg) {
+		    Ok(w) => width = w,
+		    Err(_) => return Err(ARG_WIDTH_ERROR_MSG.to_string()) 
+		}
+	    },
 	    // No matching option
 	    _ => unknown = Some(arg)
 	}
@@ -39,7 +48,7 @@ where
 	}
     }
 
-    (width, url, unknown)
+    Ok((width, url, unknown))
 }
 
 #[cfg(test)]
@@ -51,7 +60,7 @@ mod tests {
 	let args = vec![
             String::from("./pretend-there-is-an-executable")
 	];
-        assert_eq!((DEFAULT_LINE_WIDTH, false, None), arguments(args));
+        assert_eq!(Ok((DEFAULT_LINE_WIDTH, false, None)), arguments(args));
     }
 
     #[test]
@@ -60,7 +69,7 @@ mod tests {
             String::from("./pretend-this-is-an-executable"),
             String::from(ARG_ALPHABET_URL)
 	];
-        assert_eq!((DEFAULT_LINE_WIDTH, true, None), arguments(args));
+        assert_eq!(Ok((DEFAULT_LINE_WIDTH, true, None)), arguments(args));
     }
 
     #[test]
@@ -70,7 +79,7 @@ mod tests {
             String::from(ARG_WIDTH),
 	    String::from("99")
 	];
-        assert_eq!((99 as usize, false, None), arguments(args));
+        assert_eq!(Ok((99 as usize, false, None)), arguments(args));
     }
     
     #[test]
@@ -81,7 +90,7 @@ mod tests {
 	    String::from("99"),
 	    String::from("a-file.txt")
 	];
-        assert_eq!((99 as usize, false, Some("a-file.txt".to_string())), arguments(args));
+        assert_eq!(Ok((99 as usize, false, Some("a-file.txt".to_string()))), arguments(args));
     }
 
     #[test]
@@ -93,6 +102,16 @@ mod tests {
 	    String::from(ARG_ALPHABET_URL),
 	    String::from("a-file.txt")
 	];
-        assert_eq!((99 as usize, true, Some("a-file.txt".to_string())), arguments(args));
+        assert_eq!(Ok((99 as usize, true, Some("a-file.txt".to_string()))), arguments(args));
+    }
+
+    #[test]
+    fn parse_width_bad_arg() {
+	let args = vec![
+            String::from("./pretend-this-is-an-executable"),
+            String::from(ARG_WIDTH),
+	    String::from("abc") // This will provoque a failure
+	];
+        assert_eq!(Err(ARG_WIDTH_ERROR_MSG.to_string()), arguments(args));
     }
 }
