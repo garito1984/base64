@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn parse_no_args() {
 	let args = vec![
-            String::from("./pretend-there-is-an-executable")
+            "./pretend-there-is-an-executable".to_string()
 	];
         assert_eq!(Ok((DEFAULT_LINE_WIDTH, false, None)), arguments(args));
     }
@@ -66,52 +66,48 @@ mod tests {
     #[test]
     fn parse_url() {
 	let args = vec![
-            String::from("./pretend-this-is-an-executable"),
-            String::from(ARG_ALPHABET_URL)
-	];
+            "./pretend-this-is-an-executable",
+            ARG_ALPHABET_URL
+	].into_iter().map(str::to_string);
         assert_eq!(Ok((DEFAULT_LINE_WIDTH, true, None)), arguments(args));
     }
 
     #[test]
     fn parse_width() {
 	let args = vec![
-            String::from("./pretend-this-is-an-executable"),
-            String::from(ARG_WIDTH),
-	    String::from("99")
-	];
+            "./pretend-this-is-an-executable",
+            ARG_WIDTH, "99"
+	].into_iter().map(str::to_string);
         assert_eq!(Ok((99 as usize, false, None)), arguments(args));
     }
     
     #[test]
     fn parse_width_filename() {
 	let args = vec![
-            String::from("./pretend-this-is-an-executable"),
-            String::from(ARG_WIDTH),
-	    String::from("99"),
-	    String::from("a-file.txt")
-	];
+            "./pretend-this-is-an-executable",
+            ARG_WIDTH, "99",
+	    "a-file.txt"
+	].into_iter().map(str::to_string);
         assert_eq!(Ok((99 as usize, false, Some("a-file.txt".to_string()))), arguments(args));
     }
 
     #[test]
     fn parse_width_url_filename() {
 	let args = vec![
-            String::from("./pretend-this-is-an-executable"),
-            String::from(ARG_WIDTH),
-	    String::from("99"),
-	    String::from(ARG_ALPHABET_URL),
-	    String::from("a-file.txt")
-	];
+            "./pretend-this-is-an-executable",
+	    ARG_WIDTH, "99",
+	    ARG_ALPHABET_URL,
+	    "a-file.txt"
+	].into_iter().map(str::to_string);
         assert_eq!(Ok((99 as usize, true, Some("a-file.txt".to_string()))), arguments(args));
     }
 
     #[test]
     fn parse_width_bad_arg() {
 	let args = vec![
-            String::from("./pretend-this-is-an-executable"),
-            String::from(ARG_WIDTH),
-	    String::from("abc") // This will provoque a failure
-	];
+            "./pretend-this-is-an-executable",
+            ARG_WIDTH, "abc" // This will provoque a failure
+	].into_iter().map(str::to_string);
         assert_eq!(Err(ARG_WIDTH_ERROR_MSG.to_string()), arguments(args));
     }
 }
