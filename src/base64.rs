@@ -159,9 +159,11 @@ impl<'a> Buffer<'a> {
     }
 
     fn set_buf_from_str(&mut self, s: &str) {
-	self.buf = s.as_bytes().to_owned().into_boxed_slice();
-	self.read_size = self.buf.len();
-    } 
+	let bytes = s.as_bytes();
+	let n = bytes.len();
+	self.buf[..n].copy_from_slice(&bytes[..n]);
+	self.read_size = bytes.len();
+    }
 }
 
 //
