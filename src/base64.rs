@@ -167,3 +167,76 @@ impl<'a> Buffer<'a> {
 fn copy_octect(quantum: u32, byte: u8) -> u32 {
     (quantum << 8) | byte as u32
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const WIDTH_TEST_VALUE: usize = 80;
+
+    // BASE64("") = ""
+    #[test]
+    fn encode_empty() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.buf = "".as_bytes().to_owned().into_boxed_slice();
+	buf.read_size = buf.buf.len();
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+	let s: String = base64.iter().collect();
+        assert_eq!("", s);
+    }
+
+    // BASE64("f") = "Zg=="
+    #[test]
+    fn encode_f() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.buf = "fo".as_bytes().to_owned().into_boxed_slice();
+	buf.read_size = buf.buf.len();
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("Zm8=", base64.iter().collect::<String>());
+    }
+
+    // BASE64("fo") = "Zm8="
+    #[test]
+    fn encode_fo() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.buf = "fo".as_bytes().to_owned().into_boxed_slice();
+	buf.read_size = buf.buf.len();
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("Zm8=", base64.iter().collect::<String>());
+    }
+
+    // BASE64("foo") = "Zm9v"
+    #[test]
+    fn encode_foo() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.buf = "foo".as_bytes().to_owned().into_boxed_slice();
+	buf.read_size = buf.buf.len();
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("Zm9v", base64.iter().collect::<String>());
+    }
+
+    // BASE64("foob") = "Zm9vYg=="
+    #[test]
+    fn encode_foob() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.buf = "foob".as_bytes().to_owned().into_boxed_slice();
+	buf.read_size = buf.buf.len();
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("Zm9vYg==", base64.iter().collect::<String>());
+    }
+}
