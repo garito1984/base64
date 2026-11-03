@@ -156,6 +156,11 @@ impl<'a> Buffer<'a> {
 
     pub fn get_buf_len(&self) -> usize {
 	self.buf.len()
+    }
+
+    fn set_buf_from_str(&mut self, s: &str) {
+	self.buf = s.as_bytes().to_owned().into_boxed_slice();
+	self.read_size = self.buf.len();
     } 
 }
 
@@ -192,21 +197,19 @@ mod tests {
     #[test]
     fn encode_f() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.buf = "fo".as_bytes().to_owned().into_boxed_slice();
-	buf.read_size = buf.buf.len();
+	buf.set_buf_from_str("f");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
-        assert_eq!("Zm8=", base64.iter().collect::<String>());
+        assert_eq!("Zg==", base64.iter().collect::<String>());
     }
 
     // BASE64("fo") = "Zm8="
     #[test]
     fn encode_fo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.buf = "fo".as_bytes().to_owned().into_boxed_slice();
-	buf.read_size = buf.buf.len();
+	buf.set_buf_from_str("fo");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -218,8 +221,7 @@ mod tests {
     #[test]
     fn encode_foo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.buf = "foo".as_bytes().to_owned().into_boxed_slice();
-	buf.read_size = buf.buf.len();
+	buf.set_buf_from_str("foo");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -231,12 +233,36 @@ mod tests {
     #[test]
     fn encode_foob() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.buf = "foob".as_bytes().to_owned().into_boxed_slice();
-	buf.read_size = buf.buf.len();
+	buf.set_buf_from_str("foob");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zm9vYg==", base64.iter().collect::<String>());
     }
+
+    // BASE64("fooba") = "Zm9vYmE="
+    #[test]
+    fn encode_fooba() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.set_buf_from_str("fooba");
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("Zm9vYmE=", base64.iter().collect::<String>());
+    }
+
+    // BASE64("foobar") = "Zm9vYmFy"
+    #[test]
+    fn encode_foobar() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.set_buf_from_str("foobar");
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("Zm9vYmFy", base64.iter().collect::<String>());
+    }
+
 }
