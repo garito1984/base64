@@ -162,7 +162,7 @@ impl<'a> Buffer<'a> {
 	let bytes = s.as_bytes();
 	let n = bytes.len();
 	self.buf[..n].copy_from_slice(&bytes[..n]);
-	self.read_size = bytes.len();
+	self.read_size = n;
     }
 }
 
