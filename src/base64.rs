@@ -158,7 +158,7 @@ impl<'a> Buffer<'a> {
 	self.buf.len()
     }
 
-    fn set_buf_from_str(&mut self, s: &str) {
+    fn read_from_str(&mut self, s: &str) {
 	let bytes = s.as_bytes();
 	let n = bytes.len();
 	self.buf[..n].copy_from_slice(&bytes[..n]);
@@ -199,7 +199,7 @@ mod tests {
     #[test]
     fn encode_f() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.set_buf_from_str("f");
+	buf.read_from_str("f");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -211,7 +211,7 @@ mod tests {
     #[test]
     fn encode_fo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.set_buf_from_str("fo");
+	buf.read_from_str("fo");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -223,7 +223,7 @@ mod tests {
     #[test]
     fn encode_foo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.set_buf_from_str("foo");
+	buf.read_from_str("foo");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -235,7 +235,7 @@ mod tests {
     #[test]
     fn encode_foob() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.set_buf_from_str("foob");
+	buf.read_from_str("foob");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -247,7 +247,7 @@ mod tests {
     #[test]
     fn encode_fooba() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.set_buf_from_str("fooba");
+	buf.read_from_str("fooba");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
@@ -259,7 +259,7 @@ mod tests {
     #[test]
     fn encode_foobar() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	buf.set_buf_from_str("foobar");
+	buf.read_from_str("foobar");
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
