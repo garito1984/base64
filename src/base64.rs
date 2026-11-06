@@ -266,4 +266,59 @@ mod tests {
         assert_eq!("Zm9vYmFy", base64.iter().collect::<String>());
     }
 
+    // BASE64("foobar") = bmFtZSk/
+    #[test]
+    fn encode_ends_with_special_char_forward_slash() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.read_str("name)?");
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("bmFtZSk/", base64.iter().collect::<String>());
+    }
+
+    // BASE64("foobar") = PyA+IDAg
+    #[test]
+    fn encode_ends_with_special_char_plus_sign() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
+	buf.read_str("? > 0 ");
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("PyA+IDAg", base64.iter().collect::<String>());
+    }
+
+    //
+    // Test the --url switch that basically only affects
+    // special chars, characters and numbers remain the same, this changes:
+    // 1. '/' -> '_'
+    // 2. '+' -> '-'
+    //
+
+    // URL_BASE64("name)?") = bmFtZSk_
+    #[test]
+    fn url_encode_ends_with_special_underscore_char() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
+	buf.read_str("name)?");
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("bmFtZSk_", base64.iter().collect::<String>());
+    }
+
+    // URL_BASE64("? > 0 ") = PyA-IDAg
+    #[test]
+    fn url_encode_ends_with_special_dash_char() {
+	let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
+	buf.read_str("? > 0 ");
+
+	let mut base64: Vec<char> = Vec::new();
+	buf.encode(&mut base64);
+
+        assert_eq!("PyA-IDAg", base64.iter().collect::<String>());
+    }
+
 }
