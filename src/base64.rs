@@ -49,11 +49,12 @@ pub struct Buffer<'a> {
 }
 
 impl<'a> Buffer<'a> {
-    pub fn new(line_width: usize, is_url: bool) -> Buffer<'a> {
+    pub fn new(line_width: usize, is_url: bool) -> Buffer<'static> {
 	let line_width_non_zero = match line_width {
 	    0 => DEFAULT_LINE_WIDTH,
 	    _ => line_width
 	};
+
 	Buffer {
 	    buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width_non_zero].into_boxed_slice(),
 	    line_width: line_width,
