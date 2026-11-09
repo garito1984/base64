@@ -159,6 +159,7 @@ impl<'a> Buffer<'a> {
 	self.buf.len()
     }
 
+    #[cfg(test)]
     fn read_str(&mut self, s: &str) {
 	let bytes = s.as_bytes();
 	let n = bytes.len();
