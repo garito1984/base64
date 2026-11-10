@@ -173,6 +173,7 @@ fn copy_octect(quantum: u32, byte: u8) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::assert_matches;
 
     const WIDTH_TEST_VALUE: usize = 80;
 
@@ -180,7 +181,7 @@ mod tests {
     #[test]
     fn encode_empty() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -188,119 +189,119 @@ mod tests {
 
 	let s: String = base64.iter().collect();
 	assert_eq!("", s);
-	std::assert_matches!(r, Ok::<usize, io::Error>(0));
+	assert_matches!(r, Ok::<usize, io::Error>(0));
     }
 
     // BASE64("f") = "Zg=="
     #[test]
     fn encode_f() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("f".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("f".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zg==", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(1));
+	assert_matches!(r, Ok::<usize, io::Error>(1));
     }
 
     // BASE64("fo") = "Zm8="
     #[test]
     fn encode_fo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("fo".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("fo".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zm8=", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(2));
+	assert_matches!(r, Ok::<usize, io::Error>(2));
     }
 
     // BASE64("foo") = "Zm9v"
     #[test]
     fn encode_foo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("foo".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("foo".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zm9v", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(3));
+	assert_matches!(r, Ok::<usize, io::Error>(3));
     }
 
     // BASE64("foob") = "Zm9vYg=="
     #[test]
     fn encode_foob() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("foob".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("foob".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zm9vYg==", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(4));
+	assert_matches!(r, Ok::<usize, io::Error>(4));
     }
 
     // BASE64("fooba") = "Zm9vYmE="
     #[test]
     fn encode_fooba() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("fooba".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("fooba".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zm9vYmE=", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(5));
+	assert_matches!(r, Ok::<usize, io::Error>(5));
     }
 
     // BASE64("foobar") = "Zm9vYmFy"
     #[test]
     fn encode_foobar() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("foobar".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("foobar".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("Zm9vYmFy", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(6));
+	assert_matches!(r, Ok::<usize, io::Error>(6));
     }
 
     // BASE64("name)?") = bmFtZSk/
     #[test]
     fn encode_ends_with_special_char_forward_slash() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("name)?".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("name)?".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("bmFtZSk/", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(6));
+	assert_matches!(r, Ok::<usize, io::Error>(6));
     }
 
     // BASE64("? > 0 ") = PyA+IDAg
     #[test]
     fn encode_ends_with_special_char_plus_sign() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn std::io::Read> = Box::new("? > 0 ".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("? > 0 ".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("PyA+IDAg", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(6));
+	assert_matches!(r, Ok::<usize, io::Error>(6));
     }
 
     //
@@ -314,28 +315,28 @@ mod tests {
     #[test]
     fn url_encode_ends_with_special_underscore_char() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
-	let mut input: Box<dyn std::io::Read> = Box::new("name)?".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("name)?".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("bmFtZSk_", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(6));
+	assert_matches!(r, Ok::<usize, io::Error>(6));
     }
 
     // URL_BASE64("? > 0 ") = PyA-IDAg
     #[test]
     fn url_encode_ends_with_special_dash_char() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
-	let mut input: Box<dyn std::io::Read> = Box::new("? > 0 ".as_bytes());
+	let mut input: Box<dyn io::Read> = Box::new("? > 0 ".as_bytes());
 	let r = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
 	buf.encode(&mut base64);
 
         assert_eq!("PyA-IDAg", base64.iter().collect::<String>());
-	std::assert_matches!(r, Ok::<usize, io::Error>(6));
+	assert_matches!(r, Ok::<usize, io::Error>(6));
     }
 
 }
