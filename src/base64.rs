@@ -181,7 +181,7 @@ mod tests {
     #[test]
     fn encode_empty() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("".as_bytes());
+	let mut input = to_read("");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn encode_f() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("f".as_bytes());
+	let mut input = to_read("f");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn encode_fo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("fo".as_bytes());
+	let mut input = to_read("fo");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -224,7 +224,7 @@ mod tests {
     #[test]
     fn encode_foo() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("foo".as_bytes());
+	let mut input = to_read("foo");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -238,7 +238,7 @@ mod tests {
     #[test]
     fn encode_foob() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("foob".as_bytes());
+	let mut input = to_read("foob");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -252,7 +252,7 @@ mod tests {
     #[test]
     fn encode_fooba() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("fooba".as_bytes());
+	let mut input = to_read("fooba");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -266,7 +266,7 @@ mod tests {
     #[test]
     fn encode_foobar() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("foobar".as_bytes());
+	let mut input = to_read("foobar");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -280,7 +280,7 @@ mod tests {
     #[test]
     fn encode_ends_with_special_char_forward_slash() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("name)?".as_bytes());
+	let mut input = to_read("name)?");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -294,7 +294,7 @@ mod tests {
     #[test]
     fn encode_ends_with_special_char_plus_sign() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
-	let mut input: Box<dyn io::Read> = Box::new("? > 0 ".as_bytes());
+	let mut input = to_read("? > 0 ");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -315,7 +315,7 @@ mod tests {
     #[test]
     fn url_encode_ends_with_special_underscore_char() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
-	let mut input: Box<dyn io::Read> = Box::new("name)?".as_bytes());
+	let mut input = to_read("name)?");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -329,7 +329,7 @@ mod tests {
     #[test]
     fn url_encode_ends_with_special_dash_char() {
 	let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
-	let mut input: Box<dyn io::Read> = Box::new("? > 0 ".as_bytes());
+	let mut input = to_read("? > 0 ");
 	let size = buf.read(&mut input);
 
 	let mut base64: Vec<char> = Vec::new();
@@ -337,6 +337,10 @@ mod tests {
 
         assert_eq!("PyA-IDAg", base64.iter().collect::<String>());
 	assert_matches!(size, Ok::<usize, io::Error>(6));
+    }
+
+    fn to_read<'a>(s: &'a str) -> Box<dyn io::Read + 'a> {
+	Box::new(s.as_bytes())
     }
 
 }
