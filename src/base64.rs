@@ -72,11 +72,11 @@ impl<'a> Buffer<'a> {
 		    // 0b11111100
 		    chunk[0] >> 2,
 		    // 0b00000011_11110000
-		    ((chunk[0] & 0b0000_0011) << 4) | ((chunk[1] & 0b1111_0000) >> 4),
+		    0b0011_1111 & ((chunk[0] << 4) | (chunk[1] >> 4)),
 		    // 0b00001111_11000000
-		    ((chunk[1] & 0b0000_1111) << 2) | ((chunk[2] & 0b1100_0000) >> 6),
+		    0b0011_1111 & ((chunk[1] << 2) | (chunk[2] >> 6)),
 		    // 0b00111111
-		    (chunk[2] & 0b0011_1111)
+		    0b0011_1111 & chunk[2]
 		)
 	    };
 
@@ -90,8 +90,8 @@ impl<'a> Buffer<'a> {
 		    // To Base64
 		    (
 			remainder[0] >> 2,
-			((remainder[0] & 0b0000_0011) << 4) | ((remainder[1] & 0b1111_0000) >> 4),
-			(remainder[1] & 0b0000_1111) << 2,
+			0b0011_1111 & ((remainder[0] << 4) | (remainder[1] >> 4)),
+			0b0011_1111 & (remainder[1] << 2),
 			BASE64_ALPHABET_PAD_INDEX
 		    )
 		},
@@ -99,7 +99,7 @@ impl<'a> Buffer<'a> {
 		    // To Base64
 		    (
 			remainder[0] >> 2,
-			(remainder[0] & 0b00000011) << 4,
+			0b0011_1111 & (remainder[0] << 4),
 			BASE64_ALPHABET_PAD_INDEX,
 			BASE64_ALPHABET_PAD_INDEX
 		    )
