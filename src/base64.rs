@@ -67,21 +67,16 @@ impl<'a> Buffer<'a> {
 	let (chunks, remainder) = self.get_buf_read_slice().as_chunks::<3>();
 	for chunk in chunks {
 	    let (fst, snd, trd, frt) = {
-		let quantum = {
-		    // First octet
-		    let mut q = copy_octect(0, chunk[0]);
-		    // Second octet
-		    q = copy_octect(q, chunk[1]);
-		    // Third octet
-		    copy_octect(q, chunk[2])
-		};
-
 		// To Base64
 		(
-		    (quantum & 0b00000000_11111100_00000000_00000000) >> 18,
-		    (quantum & 0b00000000_00000011_11110000_00000000) >> 12,
-		    (quantum & 0b00000000_00000000_00001111_11000000) >> 6,
-		    (quantum & 0b00000000_00000000_00000000_00111111)
+		    // 0b11111100
+		    chunk[0] >> 2,
+		    // 0b00000011_11110000
+		    ((chunk[0] & 0b0000_0011) << 4) | ((chunk[1] & 0b1111_0000) >> 4),
+		    // 0b00001111_11000000
+		    ((chunk[1] & 0b0000_1111) << 2) | ((chunk[2] & 0b1100_0000) >> 6),
+		    // 0b00111111
+		    (chunk[2] & 0b0011_1111)
 		)
 	    };
 
