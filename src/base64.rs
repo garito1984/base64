@@ -64,35 +64,39 @@ impl<'a> Buffer<'a> {
     }
 
     pub fn encode(&mut self, base64: &mut Vec<char>) {
-	let mut i: usize = 0;
-	while i < self.read_size {
-	    let (fst, snd, trd, frt) = match self.read_size {
-		val if val >= i+3 => {
-		    
-		    let quantum = {
-			// First octet
-			let mut q = copy_octect(0, self.buf[i+0]);
-			// Second octet
-			q = copy_octect(q, self.buf[i+1]);
-			// Third octet
-			copy_octect(q, self.buf[i+2])
-		    };
+	let (chunks, remainder) = self.get_buf_read_slice().as_chunks::<3>();
+	for chunk in chunks {
+	    let (fst, snd, trd, frt) = {
+		let quantum = {
+		    // First octet
+		    let mut q = copy_octect(0, chunk[0]);
+		    // Second octet
+		    q = copy_octect(q, chunk[1]);
+		    // Third octet
+		    copy_octect(q, chunk[2])
+		};
 
-		    // To Base64
-		    (
-			(quantum & 0b00000000_11111100_00000000_00000000) >> 18,
-			(quantum & 0b00000000_00000011_11110000_00000000) >> 12,
-			(quantum & 0b00000000_00000000_00001111_11000000) >> 6,
-			quantum & 0b00000000_00000000_00000000_00111111
-		    )
-		},
-		val if val == i+2 => {
-		    
+		// To Base64
+		(
+		    (quantum & 0b00000000_11111100_00000000_00000000) >> 18,
+		    (quantum & 0b00000000_00000011_11110000_00000000) >> 12,
+		    (quantum & 0b00000000_00000000_00001111_11000000) >> 6,
+		    (quantum & 0b00000000_00000000_00000000_00111111)
+		)
+	    };
+
+	    [fst, snd, trd, frt].iter()
+		.for_each(|x| base64.push(self.alphabet[*x as usize]));
+	}
+
+	if remainder.len() > 0 {
+	    let (fst, snd, trd, frt) = match remainder.len() {
+		2 => {
 		    let quantum = {
 			// First octet
-			let q = copy_octect(0, self.buf[i+0]);
+			let q = copy_octect(0, remainder[0]);
 			// Second octet
-			copy_octect(q, self.buf[i+1])
+			copy_octect(q, remainder[1])
 			// Third octet (IS EMPTY)
 		    };
 
@@ -104,9 +108,9 @@ impl<'a> Buffer<'a> {
 			BASE64_ALPHABET_PAD_INDEX
 		    )
 		},
-		val if val == i+1 => {
+		1 => {
 		    // First octet
-		    let quantum = copy_octect(0, self.buf[i+0]);
+		    let quantum = copy_octect(0, remainder[0]);
 		    // Second octet (IS EMPTY)
 		    // Third octet (IS EMPTY)
 
@@ -118,16 +122,13 @@ impl<'a> Buffer<'a> {
 			BASE64_ALPHABET_PAD_INDEX
 		    )
 		},
-		_ => {
-		    panic!("This should never happen");
+		val => {
+		    panic!("There can only be 1 or 2 octets, but there was: {}", val);
 		}
 	    };
 
-	    for index in [fst, snd, trd, frt] {
-		base64.push(self.alphabet[index as usize]);
-	    }
-
-	    i += 3; // Jump to next input quantum
+	    [fst, snd, trd, frt].iter()
+		.for_each(|x| base64.push(self.alphabet[*x as usize]));
 	}
     }
 
@@ -157,6 +158,10 @@ impl<'a> Buffer<'a> {
 
     pub fn get_buf_len(&self) -> usize {
 	self.buf.len()
+    }
+
+    fn get_buf_read_slice(&self) -> &[u8] {
+	&self.buf[..self.read_size]
     }
 
 }
