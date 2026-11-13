@@ -15,7 +15,7 @@ const DEFAULT_LINE_WIDTH: usize = 76;
 const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
 
 const BASE64_ALPHABET_PAD: char = '=';
-const BASE64_ALPHABET_PAD_INDEX: u32 = 0b0100_0000; // 65 or padding char
+const BASE64_ALPHABET_PAD_INDEX: u8 = 0b0100_0000; // 65 or padding char
 const BASE64_ALPHABET: [char; 65] = [
     // Upper case characters
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -87,32 +87,19 @@ impl<'a> Buffer<'a> {
 	if remainder.len() > 0 {
 	    let (fst, snd, trd, frt) = match remainder.len() {
 		2 => {
-		    let quantum = {
-			// First octet
-			let q = copy_octect(0, remainder[0]);
-			// Second octet
-			copy_octect(q, remainder[1])
-			// Third octet (IS EMPTY)
-		    };
-
 		    // To Base64
 		    (
-			(quantum & 0b00000000_00000000_11111100_00000000) >> 10,
-			(quantum & 0b00000000_00000000_00000011_11110000) >> 4,
-			(quantum & 0b00000000_00000000_00000000_00001111) << 2,
+			remainder[0] >> 2,
+			((remainder[0] & 0b0000_0011) << 4) | ((remainder[1] & 0b1111_0000) >> 4),
+			(remainder[1] & 0b0000_1111) << 2,
 			BASE64_ALPHABET_PAD_INDEX
 		    )
 		},
 		1 => {
-		    // First octet
-		    let quantum = copy_octect(0, remainder[0]);
-		    // Second octet (IS EMPTY)
-		    // Third octet (IS EMPTY)
-
 		    // To Base64
 		    (
-			(quantum & 0b00000000_00000000_00000000_11111100) >> 2,
-			(quantum & 0b00000000_00000000_00000000_00000011) << 4,
+			remainder[0] >> 2,
+			(remainder[0] & 0b00000011) << 4,
 			BASE64_ALPHABET_PAD_INDEX,
 			BASE64_ALPHABET_PAD_INDEX
 		    )
@@ -159,15 +146,6 @@ impl<'a> Buffer<'a> {
 	&self.buf[..self.read_size]
     }
 
-}
-
-//
-// Shift the quantum 8 bits to the left and copy the byte into the lower bits
-//
-// 0b00000000_00000000_00000000_11111111 -> 0b00000000_00000000_11111111_10111011
-//
-fn copy_octect(quantum: u32, byte: u8) -> u32 {
-    (quantum << 8) | byte as u32
 }
 
 #[cfg(test)]
