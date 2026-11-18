@@ -1,8 +1,8 @@
 mod base64;
 mod config;
 
-use std::io;
 use std::fs;
+use std::io;
 
 //
 // Based on RFC 4648: The Base16, Base32, and Base64 Data Encodings
@@ -15,30 +15,30 @@ use std::fs;
 //
 fn main() -> Result<(), io::Error> {
     let (width, is_url, filename) = match config::args() {
-	Ok(args) => args,
-	Err(msg) => {
-	    println!("Bad arguments: {msg}");
-	    std::process::exit(1);
-	}
+        Ok(args) => args,
+        Err(msg) => {
+            println!("Bad arguments: {msg}");
+            std::process::exit(1);
+        }
     };
 
     let mut input: Box<dyn io::Read> = match filename {
-	Some(filename) => Box::new(fs::File::open(filename)?),
-	None => Box::new(io::stdin())
+        Some(filename) => Box::new(fs::File::open(filename)?),
+        None => Box::new(io::stdin()),
     };
 
     let mut buf = base64::Buffer::new(width, is_url);
     let mut base64: Vec<char> = Vec::with_capacity(buf.get_buf_len() + 500);
 
     while buf.read(&mut input)? > 0 {
-	// Process
-	buf.encode(&mut base64);
+        // Process
+        buf.encode(&mut base64);
 
-	// Print the encoded version
-	buf.print(&base64);
+        // Print the encoded version
+        buf.print(&base64);
 
-	// Clear for next iteration
-	base64.clear();
+        // Clear for next iteration
+        base64.clear();
     }
 
     Ok(())
