@@ -1,4 +1,4 @@
-mod base64;
+mod encoder;
 mod config;
 
 use std::fs;
@@ -27,7 +27,7 @@ fn main() -> Result<(), io::Error> {
         None => Box::new(io::stdin()),
     };
 
-    let mut buf = base64::Buffer::new(width, is_url);
+    let mut buf = encoder::Buffer::new(width, is_url);
     let mut base64: Vec<char> = Vec::with_capacity(buf.get_buf_len() + 500);
 
     while buf.read(&mut input)? > 0 {
