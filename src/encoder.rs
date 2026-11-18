@@ -47,55 +47,46 @@ impl<'a> Buffer<'a> {
     }
 
     pub fn encode(&mut self, base64: &mut Vec<u8>) {
-        let (chunks, remainder) = self.get_buf_read_slice().as_chunks::<3>();
-        for chunk in chunks {
-            let (fst, snd, trd, frt) = {
-                // To Base64
-                (
-                    // 0b11111100
-                    chunk[0] >> 2,
-                    // 0b00000011_11110000
-                    0b0011_1111 & ((chunk[0] << 4) | (chunk[1] >> 4)),
-                    // 0b00001111_11000000
-                    0b0011_1111 & ((chunk[1] << 2) | (chunk[2] >> 6)),
-                    // 0b00111111
-                    0b0011_1111 & chunk[2],
-                )
-            };
+        let (quantums, remainder) = self.get_buf_read_slice().as_chunks::<3>();
+        for quantum in quantums {
+            let encoded = [
+                // 0b11111100
+                quantum[0] >> 2,
+                // 0b00000011_11110000
+                0b0011_1111 & ((quantum[0] << 4) | (quantum[1] >> 4)),
+                // 0b00001111_11000000
+                0b0011_1111 & ((quantum[1] << 2) | (quantum[2] >> 6)),
+                // 0b00111111
+                0b0011_1111 & quantum[2],
+            ];
 
-            [fst, snd, trd, frt]
-                .iter()
-                .for_each(|x| base64.push(self.alphabet[*x as usize]));
+            for el in encoded {
+                base64.push(self.alphabet[el as usize]);
+            }
         }
 
         if !remainder.is_empty() {
-            let (fst, snd, trd, frt) = match remainder.len() {
-                2 => {
-                    // To Base64
-                    (
-                        remainder[0] >> 2,
-                        0b0011_1111 & ((remainder[0] << 4) | (remainder[1] >> 4)),
-                        0b0011_1111 & (remainder[1] << 2),
-                        BASE64_ALPHABET_PAD_INDEX,
-                    )
-                }
-                1 => {
-                    // To Base64
-                    (
-                        remainder[0] >> 2,
-                        0b0011_1111 & (remainder[0] << 4),
-                        BASE64_ALPHABET_PAD_INDEX,
-                        BASE64_ALPHABET_PAD_INDEX,
-                    )
-                }
+            let encoded = match remainder.len() {
+                2 => [
+                    remainder[0] >> 2,
+                    0b0011_1111 & ((remainder[0] << 4) | (remainder[1] >> 4)),
+                    0b0011_1111 & (remainder[1] << 2),
+                    BASE64_ALPHABET_PAD_INDEX,
+                ],
+                1 => [
+                    remainder[0] >> 2,
+                    0b0011_1111 & (remainder[0] << 4),
+                    BASE64_ALPHABET_PAD_INDEX,
+                    BASE64_ALPHABET_PAD_INDEX,
+                ],
                 val => {
                     panic!("There can only be 1 or 2 octets, but there was: {}", val);
                 }
             };
 
-            [fst, snd, trd, frt]
-                .iter()
-                .for_each(|x| base64.push(self.alphabet[*x as usize]));
+            for el in encoded {
+                base64.push(self.alphabet[el as usize]);
+            }
         }
     }
 
