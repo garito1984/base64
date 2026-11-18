@@ -36,7 +36,7 @@ impl<'a> Buffer<'a> {
         Buffer {
             buf: vec![0; INPUT_BUFFER_SIZE * BASE64_QUANTUM_BYTE_SIZE * line_width_non_zero]
                 .into_boxed_slice(),
-            line_width: line_width,
+            line_width,
             read_size: 0,
             alphabet: if is_url {
                 BASE64_ALPHABET_URL
@@ -68,7 +68,7 @@ impl<'a> Buffer<'a> {
                 .for_each(|x| base64.push(self.alphabet[*x as usize]));
         }
 
-        if remainder.len() > 0 {
+        if !remainder.is_empty() {
             let (fst, snd, trd, frt) = match remainder.len() {
                 2 => {
                     // To Base64
@@ -105,7 +105,7 @@ impl<'a> Buffer<'a> {
         Ok(size)
     }
 
-    pub fn print(&self, base64: &Vec<u8>) {
+    pub fn print(&self, base64: &[u8]) {
         use std::io::{BufWriter, Stdout, Write};
 
         const ERR_WRITE_MSG: &str = "Unexpected error writing the encoding";
@@ -134,7 +134,7 @@ impl<'a> Buffer<'a> {
             end += line_width;
         }
 
-        let _ = std::io::stdout()
+        std::io::stdout()
             .flush()
             .expect("Unexpected error flushing the encoded output");
     }
