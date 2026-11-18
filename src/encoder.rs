@@ -13,156 +13,17 @@ const DEFAULT_LINE_WIDTH: usize = 76;
 
 const BASE64_QUANTUM_BYTE_SIZE: usize = 3;
 
-const BASE64_ALPHABET_PAD: char = '=';
 const BASE64_ALPHABET_PAD_INDEX: u8 = 0b0100_0000; // 65 or padding char
-const BASE64_ALPHABET: [char; 65] = [
-    // Upper case characters
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-    // Lower case characters
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
-    'g',
-    'h',
-    'i',
-    'j',
-    'k',
-    'l',
-    'm',
-    'n',
-    'o',
-    'p',
-    'q',
-    'r',
-    's',
-    't',
-    'u',
-    'v',
-    'w',
-    'x',
-    'y',
-    'z',
-    // Numbers
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    // Special characters
-    '+',
-    '/',
-    BASE64_ALPHABET_PAD,
-];
-const BASE64_ALPHABET_URL: [char; 65] = [
-    // Upper case characters
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'O',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-    // Lower case characters
-    'a',
-    'b',
-    'c',
-    'd',
-    'e',
-    'f',
-    'g',
-    'h',
-    'i',
-    'j',
-    'k',
-    'l',
-    'm',
-    'n',
-    'o',
-    'p',
-    'q',
-    'r',
-    's',
-    't',
-    'u',
-    'v',
-    'w',
-    'x',
-    'y',
-    'z',
-    // Numbers
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    // Special characters
-    '-',
-    '_',
-    BASE64_ALPHABET_PAD,
-];
+const BASE64_ALPHABET: &[u8] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".as_bytes();
+const BASE64_ALPHABET_URL: &[u8] =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=".as_bytes();
 
 pub struct Buffer<'a> {
     buf: Box<[u8]>,
     line_width: usize,
     read_size: usize,
-    alphabet: &'a [char],
+    alphabet: &'a [u8],
 }
 
 impl<'a> Buffer<'a> {
@@ -178,14 +39,14 @@ impl<'a> Buffer<'a> {
             line_width: line_width,
             read_size: 0,
             alphabet: if is_url {
-                &BASE64_ALPHABET_URL
+                BASE64_ALPHABET_URL
             } else {
-                &BASE64_ALPHABET
+                BASE64_ALPHABET
             },
         }
     }
 
-    pub fn encode(&mut self, base64: &mut Vec<char>) {
+    pub fn encode(&mut self, base64: &mut Vec<u8>) {
         let (chunks, remainder) = self.get_buf_read_slice().as_chunks::<3>();
         for chunk in chunks {
             let (fst, snd, trd, frt) = {
@@ -244,22 +105,38 @@ impl<'a> Buffer<'a> {
         Ok(size)
     }
 
-    pub fn print(&self, base64: &Vec<char>) {
-        let disable_new_lines = 0 == self.line_width;
-        let mut count = 0;
-        for c in base64 {
-            print!("{}", c);
+    pub fn print(&self, base64: &Vec<u8>) {
+        use std::io::{BufWriter, Stdout, Write};
 
-            if disable_new_lines {
-                continue;
+        const ERR_WRITE_MSG: &str = "Unexpected error writing the encoding";
+
+        let enable_line_breaks = self.line_width != 0;
+        let line_width = match self.line_width {
+            0 => base64.len(),
+            val => val,
+        };
+
+        let mut start: usize = 0;
+        let mut end: usize = line_width;
+        let mut writer: BufWriter<Stdout> =
+            BufWriter::with_capacity(base64.len(), std::io::stdout());
+        while start < base64.len() {
+            if end > base64.len() {
+                end = base64.len();
+            }
+            let _ = writer.write(&base64[start..end]).expect(ERR_WRITE_MSG);
+
+            if enable_line_breaks && ((end - start) == line_width) {
+                let _ = writer.write("\n".as_bytes()).expect(ERR_WRITE_MSG);
             }
 
-            count += 1;
-            if count == self.line_width {
-                print!("\n");
-                count = 0;
-            }
+            start += line_width;
+            end += line_width;
         }
+
+        let _ = std::io::stdout()
+            .flush()
+            .expect("Unexpected error flushing the encoded output");
     }
 
     pub fn get_buf_len(&self) -> usize {
@@ -285,11 +162,10 @@ mod tests {
         let mut input = to_read("");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        let s: String = base64.iter().collect();
-        assert_eq!("", s);
+        assert_eq!("".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(0));
     }
 
@@ -300,10 +176,10 @@ mod tests {
         let mut input = to_read("f");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zg==", base64.iter().collect::<String>());
+        assert_eq!("Zg==".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(1));
     }
 
@@ -314,10 +190,10 @@ mod tests {
         let mut input = to_read("fo");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm8=", base64.iter().collect::<String>());
+        assert_eq!("Zm8=".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(2));
     }
 
@@ -328,10 +204,10 @@ mod tests {
         let mut input = to_read("foo");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9v", base64.iter().collect::<String>());
+        assert_eq!("Zm9v".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(3));
     }
 
@@ -342,10 +218,10 @@ mod tests {
         let mut input = to_read("foob");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9vYg==", base64.iter().collect::<String>());
+        assert_eq!("Zm9vYg==".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(4));
     }
 
@@ -356,10 +232,10 @@ mod tests {
         let mut input = to_read("fooba");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9vYmE=", base64.iter().collect::<String>());
+        assert_eq!("Zm9vYmE=".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(5));
     }
 
@@ -370,10 +246,10 @@ mod tests {
         let mut input = to_read("foobar");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9vYmFy", base64.iter().collect::<String>());
+        assert_eq!("Zm9vYmFy".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(6));
     }
 
@@ -384,10 +260,10 @@ mod tests {
         let mut input = to_read("name)?");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("bmFtZSk/", base64.iter().collect::<String>());
+        assert_eq!("bmFtZSk/".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(6));
     }
 
@@ -398,10 +274,10 @@ mod tests {
         let mut input = to_read("? > 0 ");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("PyA+IDAg", base64.iter().collect::<String>());
+        assert_eq!("PyA+IDAg".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(6));
     }
 
@@ -419,10 +295,10 @@ mod tests {
         let mut input = to_read("name)?");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("bmFtZSk_", base64.iter().collect::<String>());
+        assert_eq!("bmFtZSk_".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(6));
     }
 
@@ -433,10 +309,10 @@ mod tests {
         let mut input = to_read("? > 0 ");
         let size = buf.read(&mut input);
 
-        let mut base64: Vec<char> = Vec::new();
+        let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("PyA-IDAg", base64.iter().collect::<String>());
+        assert_eq!("PyA-IDAg".as_bytes(), base64.as_slice());
         assert_matches!(size, Ok::<usize, io::Error>(6));
     }
 

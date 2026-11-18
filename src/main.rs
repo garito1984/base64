@@ -1,5 +1,5 @@
-mod encoder;
 mod config;
+mod encoder;
 
 use std::fs;
 use std::io;
@@ -28,7 +28,7 @@ fn main() -> Result<(), io::Error> {
     };
 
     let mut buf = encoder::Buffer::new(width, is_url);
-    let mut base64: Vec<char> = Vec::with_capacity(buf.get_buf_len() + 500);
+    let mut base64: Vec<u8> = Vec::with_capacity(buf.get_buf_len() + 500);
 
     while buf.read(&mut input)? > 0 {
         // Process
