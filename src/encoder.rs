@@ -143,7 +143,7 @@ impl<'a> Buffer<'a> {
 mod tests {
     use super::*;
     use std::assert_matches;
-    use std::str::{Utf8Error};
+    use std::str::Utf8Error;
 
     const WIDTH_TEST_VALUE: usize = 80;
 
@@ -159,7 +159,7 @@ mod tests {
 
         assert_eq!("", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(0));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("f") = "Zg=="
@@ -174,7 +174,7 @@ mod tests {
 
         assert_eq!("Zg==", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(1));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("fo") = "Zm8="
@@ -189,7 +189,7 @@ mod tests {
 
         assert_eq!("Zm8=", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(2));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("foo") = "Zm9v"
@@ -204,7 +204,7 @@ mod tests {
 
         assert_eq!("Zm9v", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(3));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("foob") = "Zm9vYg=="
@@ -219,7 +219,7 @@ mod tests {
 
         assert_eq!("Zm9vYg==", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(4));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("fooba") = "Zm9vYmE="
@@ -234,7 +234,7 @@ mod tests {
 
         assert_eq!("Zm9vYmE=", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(5));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("foobar") = "Zm9vYmFy"
@@ -249,7 +249,7 @@ mod tests {
 
         assert_eq!("Zm9vYmFy", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("name)?") = bmFtZSk/
@@ -264,7 +264,7 @@ mod tests {
 
         assert_eq!("bmFtZSk/", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-	Ok(())
+        Ok(())
     }
 
     // BASE64("? > 0 ") = PyA+IDAg
@@ -279,7 +279,7 @@ mod tests {
 
         assert_eq!("PyA+IDAg", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-	Ok(())
+        Ok(())
     }
 
     //
@@ -301,7 +301,7 @@ mod tests {
 
         assert_eq!("bmFtZSk_", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-	Ok(())
+        Ok(())
     }
 
     // URL_BASE64("? > 0 ") = PyA-IDAg
@@ -316,7 +316,7 @@ mod tests {
 
         assert_eq!("PyA-IDAg", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-	Ok(())
+        Ok(())
     }
 
     fn to_read<'a>(s: &'a str) -> Box<dyn io::Read + 'a> {
