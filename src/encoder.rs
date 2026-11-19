@@ -106,11 +106,12 @@ impl<'a> Buffer<'a> {
             0 => base64.len(),
             val => val,
         };
+        let buf_size_with_end_of_lines = base64.len() + (base64.len() / line_width) + 10;
 
         let mut start: usize = 0;
         let mut end: usize = line_width;
         let mut writer: BufWriter<Stdout> =
-            BufWriter::with_capacity(base64.len(), std::io::stdout());
+            BufWriter::with_capacity(buf_size_with_end_of_lines, std::io::stdout());
         while start < base64.len() {
             if end > base64.len() {
                 end = base64.len();
@@ -125,7 +126,7 @@ impl<'a> Buffer<'a> {
             end += line_width;
         }
 
-        std::io::stdout()
+        writer
             .flush()
             .expect("Unexpected error flushing the encoded output");
     }
