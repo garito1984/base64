@@ -159,7 +159,6 @@ mod tests {
 
         assert_eq!("", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(0));
-
 	Ok(())
     }
 
@@ -175,7 +174,6 @@ mod tests {
 
         assert_eq!("Zg==", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(1));
-
 	Ok(())
     }
 
@@ -191,7 +189,6 @@ mod tests {
 
         assert_eq!("Zm8=", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(2));
-
 	Ok(())
     }
 
@@ -207,7 +204,6 @@ mod tests {
 
         assert_eq!("Zm9v", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(3));
-
 	Ok(())
     }
 
@@ -223,7 +219,6 @@ mod tests {
 
         assert_eq!("Zm9vYg==", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(4));
-
 	Ok(())
     }
 
@@ -239,7 +234,6 @@ mod tests {
 
         assert_eq!("Zm9vYmE=", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(5));
-
 	Ok(())
     }
 
@@ -255,7 +249,6 @@ mod tests {
 
         assert_eq!("Zm9vYmFy", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-
 	Ok(())
     }
 
@@ -271,7 +264,6 @@ mod tests {
 
         assert_eq!("bmFtZSk/", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-
 	Ok(())
     }
 
@@ -287,7 +279,6 @@ mod tests {
 
         assert_eq!("PyA+IDAg", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-
 	Ok(())
     }
 
@@ -310,7 +301,6 @@ mod tests {
 
         assert_eq!("bmFtZSk_", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-
 	Ok(())
     }
 
@@ -326,7 +316,6 @@ mod tests {
 
         assert_eq!("PyA-IDAg", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
-
 	Ok(())
     }
 
