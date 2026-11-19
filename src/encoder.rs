@@ -143,12 +143,13 @@ impl<'a> Buffer<'a> {
 mod tests {
     use super::*;
     use std::assert_matches;
+    use std::str::{Utf8Error};
 
     const WIDTH_TEST_VALUE: usize = 80;
 
     // BASE64("") = ""
     #[test]
-    fn encode_empty() {
+    fn encode_empty() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("");
         let size = buf.read(&mut input);
@@ -156,13 +157,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("".as_bytes(), base64.as_slice());
+        assert_eq!("", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(0));
+
+	Ok(())
     }
 
     // BASE64("f") = "Zg=="
     #[test]
-    fn encode_f() {
+    fn encode_f() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("f");
         let size = buf.read(&mut input);
@@ -170,13 +173,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zg==".as_bytes(), base64.as_slice());
+        assert_eq!("Zg==", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(1));
+
+	Ok(())
     }
 
     // BASE64("fo") = "Zm8="
     #[test]
-    fn encode_fo() {
+    fn encode_fo() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("fo");
         let size = buf.read(&mut input);
@@ -184,13 +189,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm8=".as_bytes(), base64.as_slice());
+        assert_eq!("Zm8=", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(2));
+
+	Ok(())
     }
 
     // BASE64("foo") = "Zm9v"
     #[test]
-    fn encode_foo() {
+    fn encode_foo() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("foo");
         let size = buf.read(&mut input);
@@ -198,13 +205,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9v".as_bytes(), base64.as_slice());
+        assert_eq!("Zm9v", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(3));
+
+	Ok(())
     }
 
     // BASE64("foob") = "Zm9vYg=="
     #[test]
-    fn encode_foob() {
+    fn encode_foob() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("foob");
         let size = buf.read(&mut input);
@@ -212,13 +221,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9vYg==".as_bytes(), base64.as_slice());
+        assert_eq!("Zm9vYg==", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(4));
+
+	Ok(())
     }
 
     // BASE64("fooba") = "Zm9vYmE="
     #[test]
-    fn encode_fooba() {
+    fn encode_fooba() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("fooba");
         let size = buf.read(&mut input);
@@ -226,13 +237,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9vYmE=".as_bytes(), base64.as_slice());
+        assert_eq!("Zm9vYmE=", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(5));
+
+	Ok(())
     }
 
     // BASE64("foobar") = "Zm9vYmFy"
     #[test]
-    fn encode_foobar() {
+    fn encode_foobar() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("foobar");
         let size = buf.read(&mut input);
@@ -240,13 +253,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("Zm9vYmFy".as_bytes(), base64.as_slice());
+        assert_eq!("Zm9vYmFy", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
+
+	Ok(())
     }
 
     // BASE64("name)?") = bmFtZSk/
     #[test]
-    fn encode_ends_with_special_char_forward_slash() {
+    fn encode_ends_with_special_char_forward_slash() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("name)?");
         let size = buf.read(&mut input);
@@ -254,13 +269,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("bmFtZSk/".as_bytes(), base64.as_slice());
+        assert_eq!("bmFtZSk/", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
+
+	Ok(())
     }
 
     // BASE64("? > 0 ") = PyA+IDAg
     #[test]
-    fn encode_ends_with_special_char_plus_sign() {
+    fn encode_ends_with_special_char_plus_sign() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, false);
         let mut input = to_read("? > 0 ");
         let size = buf.read(&mut input);
@@ -268,8 +285,10 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("PyA+IDAg".as_bytes(), base64.as_slice());
+        assert_eq!("PyA+IDAg", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
+
+	Ok(())
     }
 
     //
@@ -281,7 +300,7 @@ mod tests {
 
     // URL_BASE64("name)?") = bmFtZSk_
     #[test]
-    fn url_encode_ends_with_special_underscore_char() {
+    fn url_encode_ends_with_special_underscore_char() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
         let mut input = to_read("name)?");
         let size = buf.read(&mut input);
@@ -289,13 +308,15 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("bmFtZSk_".as_bytes(), base64.as_slice());
+        assert_eq!("bmFtZSk_", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
+
+	Ok(())
     }
 
     // URL_BASE64("? > 0 ") = PyA-IDAg
     #[test]
-    fn url_encode_ends_with_special_dash_char() {
+    fn url_encode_ends_with_special_dash_char() -> Result<(), Utf8Error> {
         let mut buf = Buffer::new(WIDTH_TEST_VALUE, true);
         let mut input = to_read("? > 0 ");
         let size = buf.read(&mut input);
@@ -303,8 +324,10 @@ mod tests {
         let mut base64: Vec<u8> = Vec::new();
         buf.encode(&mut base64);
 
-        assert_eq!("PyA-IDAg".as_bytes(), base64.as_slice());
+        assert_eq!("PyA-IDAg", std::str::from_utf8(&base64)?);
         assert_matches!(size, Ok::<usize, io::Error>(6));
+
+	Ok(())
     }
 
     fn to_read<'a>(s: &'a str) -> Box<dyn io::Read + 'a> {
