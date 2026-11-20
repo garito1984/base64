@@ -4,6 +4,8 @@ mod encoder;
 use std::fs;
 use std::io;
 
+const BASE64_ENCODING_INCREASE: f64 = 1.36;
+
 //
 // Based on RFC 4648: The Base16, Base32, and Base64 Data Encodings
 //
@@ -28,7 +30,8 @@ fn main() -> Result<(), io::Error> {
     };
 
     let mut buf = encoder::Buffer::new(width, is_url);
-    let mut base64: Vec<u8> = Vec::with_capacity(buf.get_buf_len() + 500);
+    let mut base64: Vec<u8> =
+        Vec::with_capacity((buf.get_buf_len() as f64 * BASE64_ENCODING_INCREASE) as usize);
 
     while buf.read(&mut input)? > 0 {
         // Process
